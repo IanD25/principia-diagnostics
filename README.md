@@ -32,12 +32,14 @@ Your Dataset (CSV / JSON / MATPOWER / custom)
 | Dataset | Entries | Links | PFD Score | Verdict |
 |---------|---------|-------|-----------|---------|
 | E. coli core metabolic network | 304 | 536 | 0.973 | CONSISTENT + WELL-INTEGRATED |
-| Zoo animal taxonomy | 426 | 437 | -- | CONSISTENT |
-| Periodic Table | 119 | 1,671 | -- | CONSISTENT |
-| IEEE Power Grids (case14/57/118) | 14-118 | varies | -- | MARGINAL (domain-correct) |
+| Zoo animal taxonomy* | 426 | 437 | -- | CONSISTENT |
+| Periodic Table* | 119 | 1,671 | -- | CONSISTENT |
+| IEEE Power Grids* (case14/57/118) | 14-118 | varies | -- | MARGINAL (domain-correct) |
 | CCBH cosmology cluster (3 papers) | 22 | 29 | 0.882 | MARGINAL + WELL-INTEGRATED |
 
 Example HTML reports (Tier-1 and Tier-2 for E. coli) are included in `data/reports/examples/` — open them in any browser to see what the output looks like.
+
+*\*Data not included in repo — parsers available in `src/ingestion/parsers/` if you want to reproduce these results with your own source files.*
 
 ---
 
@@ -289,7 +291,7 @@ principia-diagnostics/
 |   +-- rrp/                   # Example datasets
 |       |-- ecoli_core/        # E. coli metabolic network (PFD 0.973)
 |       +-- ccbh/              # Cosmological coupling papers (PFD 0.882)
-+-- tests/                     # Test suite (450+ tests)
++-- tests/                     # Test suite (470+ tests)
 ```
 
 ---

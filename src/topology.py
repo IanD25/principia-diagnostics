@@ -1,6 +1,6 @@
 """
 topology.py — Read-only query functions over wiki_history.db.
-Used by mcp_server.py to answer questions about semantic evolution.
+Provides semantic evolution queries: snapshot history, embedding drift, neighbor changes.
 """
 import json
 import sqlite3
@@ -27,7 +27,7 @@ def _latest_snapshot_id(conn: sqlite3.Connection) -> str | None:
     return row["snapshot_id"] if row else None
 
 
-# ── Public API (called by mcp_server.py) ─────────────────────────────────────
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def list_snapshots() -> list[dict]:
     """All snapshots, newest first."""

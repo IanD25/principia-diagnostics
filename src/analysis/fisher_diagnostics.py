@@ -6,7 +6,7 @@ Implements DS Wiki entries:
   T1: Fisher Rank Monotonicity      — D_eff non-increasing under coarse-graining
   X0_FIM_Regimes                    — three output regimes (output vocabulary)
 
-Reference: FISHER_SUITE_SPEC.md v1.0; Darling (2026) preprint.
+Reference: See docs/FISHER_PIPELINE_REDESIGN.md for the 6-step pipeline specification.
 
 Entry points:
     build_wiki_graph(db_path)               → (G, labels)           single-universe graph

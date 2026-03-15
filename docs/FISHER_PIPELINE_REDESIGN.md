@@ -1,7 +1,7 @@
 # PFD Pipeline Redesign — Fisher Suite in the Full Diagnostic Architecture
 **Version:** 1.0 | **Date:** 2026-03-11 | **Status:** Design — approved for implementation
-**Supersedes:** Phase D–F scope in `FISHER_SUITE_SPEC.md`
-**Prerequisite:** `FISHER_SUITE_SPEC.md` Phase A–C complete (all tests passing)
+**Supersedes:** Phase D–F scope in original Fisher Suite specification
+**Prerequisite:** Fisher Suite Phase A–C complete (all tests passing)
 
 ---
 
@@ -134,7 +134,7 @@ When `analyze_node()` is called on a DS Wiki node in G_bridge:
 
 ## 3. New Phase Map (D–F Redefined)
 
-The original Phase D–F from `FISHER_SUITE_SPEC.md` are redefined as follows.
+The original Phase D–F from the Fisher Suite specification are redefined as follows.
 
 ### Phase D — `build_bridge_graph()` + Internal RRP CLI
 
@@ -165,18 +165,16 @@ Default 0.75 matches tier-1.5 quality floor used throughout the system.
 
 ### Phase E — MCP Tools (Internal + Bridge modes)
 
-**Deliverables:** Three new MCP tools in `mcp_server.py`:
+**Deliverables:** Three analysis tools accessible via CLI:
 
 | Tool | Description |
 |------|-------------|
-| `fisher_analyze_node` | Analyze a single node in either G_internal or G_bridge |
-| `fisher_sweep_rrp` | Run full sweep on an RRP universe's internal graph |
-| `fisher_sweep_bridge` | Run full sweep on the bridge graph for an RRP+Wiki pair |
+| `pfd node --node-id X` | Analyze a single node in either G_internal or G_bridge |
+| `pfd internal --rrp X` | Run full sweep on an RRP universe's internal graph |
+| `pfd bridge --rrp X` | Run full sweep on the bridge graph for an RRP+Wiki pair |
 
-Each tool accepts `mode: "internal" | "bridge"` and routes accordingly.
-
-**Note:** The original Phase D MCP tools (`fisher_sweep_wiki`) remain but are reclassified as
-DS Wiki self-analysis — useful for validating that the reference lake's own geometry is healthy.
+**Note:** DS Wiki self-analysis (`pfd wiki`) remains available for validating
+that the reference wiki's own geometry is healthy.
 
 ### Phase F — `fisher_report.py` + Two-Tier Output
 
@@ -186,9 +184,9 @@ DS Wiki self-analysis — useful for validating that the reference lake's own ge
 
 **Two-tier report schema:** See Section 5.
 
-### Phase G — CLAUDE.md + MASTER_SUMMARY.md Update
+### Phase G — Documentation Update
 
-Final documentation pass. CLAUDE.md Phase Status table updated to reflect the full 6-step
+Final documentation pass. All project documentation updated to reflect the full 6-step
 pipeline as the canonical PFD architecture.
 
 ---
@@ -266,9 +264,9 @@ The following components are correct and stable — no redesign needed:
 
 ```
 Phase D:  build_bridge_graph() + CLI --mode internal_rrp + --mode bridge
-Phase E:  MCP tools (fisher_analyze_node, fisher_sweep_rrp, fisher_sweep_bridge)
+Phase E:  CLI tools (pfd node, pfd internal, pfd bridge)
 Phase F:  fisher_report.py + --mode report + two-tier output
-Phase G:  CLAUDE.md + MASTER_SUMMARY.md update
+Phase G:  Documentation update
 ```
 
 Each phase ends with all tests passing before the next begins.

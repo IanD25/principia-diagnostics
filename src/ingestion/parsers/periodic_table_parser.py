@@ -373,7 +373,7 @@ def parse_periodic_table(
     raw_json: str | Path,
     output_db: str | Path,
 ) -> sqlite3.Connection:
-    """Convenience wrapper used by scripts and MCP tools."""
+    """Convenience wrapper used by scripts and CLI."""
     parser = PeriodicTableParser(raw_json)
     return parser.parse(output_db)
 

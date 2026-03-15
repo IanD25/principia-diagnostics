@@ -567,7 +567,7 @@ class CoverageAnalyzer:
 
     def get_stats(self) -> dict:
         """
-        Return a compact statistics dictionary (suitable for MCP tool output
+        Return a compact statistics dictionary (suitable for programmatic access
         or quick inspection). Does not generate the full markdown report.
         """
         report = self.compute_report()

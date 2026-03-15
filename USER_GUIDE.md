@@ -1,6 +1,6 @@
 # Principia Formal Diagnostics (PFD) — User Guide
 
-**Last updated:** 2026-03-11 | **Status:** Live (Phases 0–2.3 stable, Phase 3+ planned)
+**Last updated:** 2026-03-15 | **Status:** Live (Phases 0–2.3 stable, Phase 3 in development)
 
 ---
 
@@ -9,9 +9,9 @@
 PFD is a **graph diagnostics engine** — it ingests research datasets (called RRPs: Research Reference Packages) and automatically analyzes them for structural coherence, dimensionality, and cross-domain analogies.
 
 **In plain English:**
-- You upload 1+ datasets of your research (metabolic networks, taxonomies, power grids, chemical properties, etc.)
-- PFD checks: "Is this internally consistent? Are there hidden structural patterns? How does it compare to other datasets?"
-- You get back: diagnostic scores, detailed reports, and discovered analogies between your datasets
+- You provide a structured dataset (metabolic networks, taxonomies, power grids, chemical properties, etc.)
+- PFD checks: "Is this internally consistent? Are there hidden structural patterns? How does it relate to known scientific foundations?"
+- You get back: diagnostic scores, detailed reports, and discovered analogies
 
 **This is a diagnostic tool, not a judge.** Every output shows *why* it reached its conclusion. No black-box verdicts.
 
@@ -34,16 +34,16 @@ PFD is a **graph diagnostics engine** — it ingests research datasets (called R
 
 1. **Ingest your dataset** → Convert it to PFD's Research Reference Package (RRP) schema
 2. **Run internal diagnostics** → Check if your dataset is internally coherent (Tier-1 report)
-3. **Compare datasets** → Upload 2+ of your own RRPs, run bridge analysis to find structural analogies
+3. **Run bridge analysis** → Compare your dataset against the reference wiki of scientific foundations
 4. **View detailed reports** → Topology hubs, noise characterization, dimensionality analysis
 
-### ⏳ Phase 3 — Planned (Q2 2026)
+### ⏳ Phase 3 — In Development
 
-- **Claim validation:** Submit explicit claims about your data; PFD validates them against formal axioms
-- **Formal proof paths:** See the logical chain supporting (or refuting) your claims
-- **Fallacy detection:** Automatic identification of common logical errors
+- **Claim extraction:** Extract testable claims from paper PDFs or text
+- **Claim resolution:** Match claims against the reference wiki for validation
+- **Structural alignment:** Signed polarity scoring for paper-based RRPs
 
-### 📋 Phase 4 — Future (Q3+ 2026)
+### 📋 Phase 4 — Future
 
 - **Formal logic layer:** Deeper axiom-based validation with confidence bounds
 
@@ -53,30 +53,28 @@ PFD is a **graph diagnostics engine** — it ingests research datasets (called R
 
 When you use PFD, here's what happens behind the scenes.
 
-**[→ View Interactive Workflow Diagram](PFD_WORKFLOW_DIAGRAM.png)**
-
 ```
-Your Dataset (Excel, CSV, JSON, SQLite, etc.)
+Your Dataset (CSV / JSON / MATPOWER / PDF / custom)
         ↓
-[Step 1] INGEST → Convert to RRP schema (standardized entries + links)
+[Step 1] INGEST         -> Convert to RRP schema (standardized entries + links)
         ↓
-[Step 2] BUILD INTERNAL GRAPH → Model your dataset's structure
+[Step 2] BUILD GRAPH    -> Model your dataset's structure
         ↓
-[Step 3] INTERNAL DIAGNOSTICS → Compute coherence, noise, topology
+[Step 3] INTERNAL DIAG  -> Compute coherence, noise, topology
         ↓ (You get Tier-1 Report here)
         ├─→ Internally Consistent ✓
         ├─→ Marginal (mixed signals)
         └─→ Fragmented (high noise)
         ↓
-[Step 4] BUILD BRIDGE GRAPH → (Optional) Compare to other RRPs
+[Step 4] BUILD BRIDGE   -> Compare to reference wiki (semantic similarity)
         ↓
-[Step 5] BRIDGE DIAGNOSTICS → Find structural analogies, domain overlaps
+[Step 5] BRIDGE DIAG    -> Find structural analogies, domain overlaps
         ↓ (You get Tier-2 Report here)
         ├─→ Well-Integrated (high analogy score)
         ├─→ Partial (some connections)
         └─→ Isolated (no analogies found)
         ↓
-[Step 6] GENERATE REPORT → Two-tier output with PFD Score (0.0–1.0)
+[Step 6] GENERATE REPORT -> Two-tier output with PFD Score (0.0–1.0)
         ↓
 Two-Tier Report + Visualization
 ```
@@ -93,88 +91,85 @@ cd principia-diagnostics
 bash setup.sh
 ```
 
-(See [Setup Details](#detailed-setup) for troubleshooting.)
+(See [Setup Details](#troubleshooting) below for troubleshooting.)
 
-### 2. Prepare Your Data
+### 2. Activate and Run
 
-PFD expects two CSV files:
+```bash
+source .venv/bin/activate
 
-**entries.csv** — Things in your dataset
+# Run on the included E. coli example dataset
+pfd report --rrp data/rrp/ecoli_core/rrp_ecoli_core.db
+```
+
+### 3. View Results
+
+Open the generated HTML report in your browser (saved to `data/reports/`).
+You'll see an interactive D3.js network visualization, coherence charts, and bridge quality histograms.
+
+### 4. Run Internal-Only Analysis (No Bridge Step)
+
+```bash
+pfd internal --rrp data/rrp/ecoli_core/rrp_ecoli_core.db
+```
+
+This gives you a Tier-1 report without comparing to the reference wiki — useful for a quick structural check.
+
+---
+
+## Adding Your Own Dataset
+
+PFD analyzes datasets by first converting them into an **RRP (Research Reference Package)** — a standardized SQLite database. The repo includes parsers for several formats, but you can also write your own.
+
+### Option A: Write a Parser
+
+Create `src/ingestion/parsers/your_parser.py` following existing patterns (see `ecoli_core_parser.py` for a complete example):
+
+```python
+from ingestion.rrp_bundle import create_rrp_bundle
+
+conn = create_rrp_bundle("my_dataset.db", name="My Dataset", source="my_data.csv", fmt="csv")
+
+# Insert entries
+conn.execute("""INSERT INTO entries (id, title, entry_type, domain)
+                VALUES (?, ?, ?, ?)""", ("E001", "Pyruvate", "instantiation", "biochemistry"))
+
+# Insert links
+conn.execute("""INSERT INTO links (link_type, source_id, source_label, target_id, target_label)
+                VALUES (?, ?, ?, ?, ?)""", ("produces", "E001", "E001", "E002", "E002"))
+
+conn.commit()
+conn.close()
+```
+
+### Option B: Follow the CSV Convention
+
+Prepare two CSV files and write a short parser that reads them:
+
+**entries.csv:**
 ```csv
 entry_id,title,description,entry_type,domain
 E001,Pyruvate,Central metabolite in glycolysis,instantiation,biochemistry
 E002,Acetyl-CoA,Carrier of acetyl groups,instantiation,biochemistry
-...
 ```
 
-**links.csv** — Relationships between entries
+**links.csv:**
 ```csv
 source_id,target_id,link_type,description
 E001,E002,produces,Pyruvate → Acetyl-CoA in TCA cycle
-E002,E003,activates,Acetyl-CoA activates downstream reactions
-...
 ```
 
-### 3. Run Ingestion (Step 1 + 2)
+### After Creating Your RRP
 
 ```bash
-python3 scripts/ingest_your_dataset.py \
-    --entries entries.csv \
-    --links links.csv \
-    --name my_dataset \
-    --output data/rrp/my_dataset/
+# Build semantic bridges to the reference wiki
+python scripts/run_entity_catalog_pass.py your_rrp.db data/chroma_db data/ds_wiki.db
+
+# Run full analysis
+pfd report --rrp your_rrp.db
 ```
 
-Creates: `data/rrp/my_dataset/rrp_my_dataset.db`
-
-### 4. Run Diagnostics (Step 3)
-
-```bash
-python scripts/run_fisher_suite.py --mode internal_rrp \
-    --rrp-db data/rrp/my_dataset/rrp_my_dataset.db
-```
-
-**Output:**
-```
-RRP Analysis: my_dataset
-├─ Entries:        47
-├─ Links:          89
-├─ Internal Coherence: INTERNALLY CONSISTENT (81.3%)
-├─ Mean D_eff:     8.2 (metabolic hub structure)
-├─ Noise Fraction: 12.4%
-└─ Verdict:        Tier-1 ✓
-```
-
-### 5. Compare to Another Dataset (Optional — Steps 4+5)
-
-```bash
-python scripts/run_fisher_suite.py --mode bridge \
-    --rrp-db data/rrp/my_dataset/rrp_my_dataset.db \
-    --rrp-compare data/rrp/another_dataset/rrp_another_dataset.db
-```
-
-**Output:**
-```
-Bridge Analysis: my_dataset ↔ another_dataset
-├─ Bridges Found:     23 structural analogies
-├─ Top Analogy:       E001 (pyruvate) ↔ X_Hub_7 (network hub)
-│                     Similarity: 0.87 (isotropic topology match)
-├─ Cross-Domain Reach: 89% (23/26 entries linked)
-└─ Verdict:           WELL-INTEGRATED (Phase 2.3)
-```
-
-### 6. Get Full Report (All Steps 1–6)
-
-```bash
-python scripts/run_fisher_suite.py --mode report \
-    --rrp-db data/rrp/my_dataset/rrp_my_dataset.db \
-    --rrp-compare data/rrp/another_dataset/rrp_another_dataset.db
-```
-
-Generates:
-- `rrp_my_dataset_report.json` (Tier-1 + Tier-2 diagnostics)
-- `rrp_my_dataset_visualization.html` (interactive graph)
-- `rrp_my_dataset_summary.txt` (human-readable verdict)
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed parser writing instructions.
 
 ---
 
@@ -199,22 +194,22 @@ Answers: **"Is your dataset internally consistent?"**
   - Meaning: Mostly noise; hard to identify real structure
   - Action: Review your data for errors, missing entries, or over-linking
 
-### Tier-2 Verdict (Cross-Dataset Analogies)
+### Tier-2 Verdict (Cross-Domain Analogies)
 
-Answers: **"How does your dataset relate to other datasets?"**
+Answers: **"How does your dataset relate to known scientific foundations?"**
 
 - **WELL-INTEGRATED** (✓✓)
-  - > 75% of your entries match structures in comparison dataset
+  - > 75% of your entries match structures in the reference wiki
   - Mean analogy similarity > 0.75
-  - Meaning: You found structural analogies; domains are deeply connected
+  - Meaning: Strong structural parallels to established science
 
 - **PARTIAL**
   - 40–75% entry reach, or 0.55–0.75 similarity
-  - Meaning: Some analogies exist; domains are loosely connected
+  - Meaning: Some analogies exist; domain connections are loose
 
 - **ISOLATED**
   - < 40% entry reach, or < 0.55 similarity
-  - Meaning: No strong structural matches; domains are orthogonal
+  - Meaning: No strong structural matches; novel or orthogonal domain
 
 ### PFD Score (Final Grade)
 
@@ -226,61 +221,8 @@ Range: **0.0 (no structure) to 1.0 (perfect coherence + integration)**
 
 Example:
 - E. coli (Tier-1: 0.81, Tier-2: 1.0) → **PFD Score 0.91** ✓✓
+- CCBH cosmology (Tier-1: 0.77, Tier-2: 1.0) → **PFD Score 0.88** ✓
 - IEEE Power Grid (Tier-1: 0.67, Tier-2: 1.0) → **PFD Score 0.83** ✓
-- Hypothetical noisy data (Tier-1: 0.35, Tier-2: 0.45) → **PFD Score 0.40** ⚠
-
----
-
-## Common Workflows
-
-### Workflow A: Validate a Single Dataset
-
-```bash
-# Ingest
-python3 scripts/ingest_your_dataset.py --entries E.csv --links L.csv --name my_data --output data/rrp/my_data/
-
-# Internal diagnostics
-python scripts/run_fisher_suite.py --mode internal_rrp --rrp-db data/rrp/my_data/rrp_my_data.db
-
-# Full report (single)
-python scripts/run_fisher_suite.py --mode report --rrp-db data/rrp/my_data/rrp_my_data.db
-```
-
-**Output:** Tier-1 report + visualization
-
----
-
-### Workflow B: Find Analogies Between Two Datasets
-
-```bash
-# Ingest both
-python3 scripts/ingest_your_dataset.py --entries dataset1_entries.csv --links dataset1_links.csv --name dataset1 --output data/rrp/dataset1/
-python3 scripts/ingest_your_dataset.py --entries dataset2_entries.csv --links dataset2_links.csv --name dataset2 --output data/rrp/dataset2/
-
-# Compare
-python scripts/run_fisher_suite.py --mode bridge \
-    --rrp-db data/rrp/dataset1/rrp_dataset1.db \
-    --rrp-compare data/rrp/dataset2/rrp_dataset2.db
-
-# Full two-tier report
-python scripts/run_fisher_suite.py --mode report \
-    --rrp-db data/rrp/dataset1/rrp_dataset1.db \
-    --rrp-compare data/rrp/dataset2/rrp_dataset2.db
-```
-
-**Output:** Tier-1 + Tier-2 report + bridge list + visualization
-
----
-
-### Workflow C: Batch-Analyze Multiple Datasets
-
-(Coming Phase 3+)
-
-```bash
-python scripts/batch_analyze.py --input-dir data/rrp/ --output results/
-```
-
-Will generate: All pairwise comparisons + summary correlation matrix
 
 ---
 
@@ -304,49 +246,35 @@ How does your network's topology distribute?
 
 ### Similarity Score
 
-When comparing two entries across datasets, PFD computes a **similarity score (0.0–1.0)** based on:
-- Structural role (both hubs? both leaves?)
-- Connectivity pattern (same # of links?)
-- Topological neighborhood (similar subgraphs?)
-
-Similarity **> 0.75** is considered a strong analogy.
+When comparing entries to the reference wiki, PFD computes a **similarity score (0.0–1.0)** using BGE semantic embeddings:
+- Tier 1: ≥ 0.85 (strong match)
+- Tier 1.5: ≥ 0.75 (moderate match)
+- Tier 2: < 0.75 (weak match)
 
 ---
 
 ## Data Format Reference
 
-### entries.csv Format
-
-```csv
-entry_id,title,description,entry_type,domain
-E001,Pyruvate,Central metabolite,instantiation,biochemistry
-E002,Acetyl-CoA,Activated group carrier,instantiation,biochemistry
-E003,Glycolysis,ATP generation pathway,process,biochemistry
-```
+### entries table
 
 | Column | Type | Required? | Notes |
 |--------|------|-----------|-------|
-| entry_id | string | ✓ | Unique; e.g., E001, BUS_14, GENE_ABC |
+| id | string | ✓ | Unique entry identifier |
 | title | string | ✓ | Human-readable name |
-| description | text | ✓ | What this entry is (1–2 sentences) |
-| entry_type | enum | ✓ | instantiation, process, constraint, property, object, etc. |
-| domain | string | ✓ | biochemistry, electrical_engineering, mathematics, etc. |
+| entry_type | enum | ✓ | reference_law, instantiation, method, constraint, etc. |
+| domain | string | ✓ | biochemistry, physics, mathematics, etc. |
+| source_type | string | | paper_section, database_record, etc. |
+| status | string | | established, superseded |
+| confidence | string | | Tier 1, Tier 2, etc. |
 
-### links.csv Format
-
-```csv
-source_id,target_id,link_type,description
-E001,E002,produces,Pyruvate → Acetyl-CoA in TCA cycle
-E002,E003,activates,Acetyl-CoA activates TCA cycle
-E001,E001,self_regulatory,Pyruvate inhibits upstream glycolysis
-```
+### links table
 
 | Column | Type | Required? | Notes |
 |--------|------|-----------|-------|
-| source_id | string | ✓ | Must exist in entries.csv |
-| target_id | string | ✓ | Must exist in entries.csv; can equal source_id (self-loop) |
-| link_type | string | ✓ | activates, inhibits, produces, contains, follows, etc. |
-| description | text | ✓ | Why this link exists (1 sentence) |
+| source_id | string | ✓ | Must exist in entries |
+| target_id | string | ✓ | Must exist in entries |
+| link_type | string | ✓ | derives_from, analogous_to, produces, etc. |
+| confidence_tier | string | | 1, 1.5, or 2 |
 
 ---
 
@@ -366,16 +294,14 @@ Noise:        7.8%
 Top Hub:      met_pyr_c (pyruvate — 23 links, central TCA intermediate)
 ```
 
-**Tier-2 Result (comparing to Periodic Table dataset):**
+**Tier-2 Result:**
 ```
-Bridges:      47 cross-domain analogies
-Reach:        100% (all E. coli entries found matches)
-Top Analogy:  met_pyr_c (metabolite hub) ↔ CHEM5 (chemistry entry)
-              Similarity: 0.89 (both are distribution hubs in their domains)
-Verdict:      WELL-INTEGRATED (0.89 bridge quality)
+Bridges:      912 cross-domain analogies
+Top Anchor:   CHEM5 (134 bridges — chemistry hub)
+Verdict:      WELL-INTEGRATED
 ```
 
-**Final PFD Score:** 0.94/1.0 ✓✓
+**Final PFD Score:** 0.973/1.0 ✓✓
 
 ---
 
@@ -383,23 +309,24 @@ Verdict:      WELL-INTEGRATED (0.89 bridge quality)
 
 | Problem | Cause | Solution |
 |---------|-------|----------|
-| `ModuleNotFoundError: pandapower` | Missing dependency | `pip install pandapower -q` |
-| `sqlite3.OperationalError: no such table: entries` | Malformed CSV | Verify entries.csv has required columns (entry_id, title, description, entry_type, domain) |
-| `Fisher Suite returns empty report` | RRP database missing entries | Re-run ingestion; check output DB with `sqlite3 rrp_my_data.db "SELECT COUNT(*) FROM entries"` |
-| `Similarity scores all < 0.5` | Datasets too dissimilar | Expected if domains are unrelated; try comparing within-domain datasets first |
-| Permission error on Windows | File locking | Ensure no other process has DB file open; close spreadsheet applications |
+| `python: command not found` | Python not installed | Install Python 3.11+ from [python.org](https://python.org) |
+| `ModuleNotFoundError` | Virtual environment not activated | Run `source .venv/bin/activate` |
+| First run slow (~5 min) | Downloading embedding model (~430MB) | Normal — cached after first download |
+| `sqlite3.OperationalError: no such table` | ChromaDB index not built | Run `python3 -m sync` |
+| Unicode errors on Windows | Python not in UTF-8 mode | Set `PYTHONUTF8=1` before running |
+| `pfd: command not found` | Package not installed | Run `pip install -e .` from repo root |
+| `ModuleNotFoundError: pandapower` | IEEE parser needs optional dep | `pip install pandapower` |
 
-For more: Open an issue on [GitHub](https://github.com/IanD25/principia-diagnostics/issues).
+For more help: [Open an issue on GitHub](https://github.com/IanD25/principia-diagnostics/issues).
 
 ---
 
 ## Next Steps
 
-1. **Prepare your data** → Convert to entries.csv + links.csv
-2. **Run Quick Start steps 1–4** → Get Tier-1 report
-3. **Optional: Compare datasets** → Follow Workflow B for Tier-2
-4. **Review report** → Understand what D_eff and coherence mean for your domain
-5. **Give feedback** → What was confusing? What would help? [Open issue](https://github.com/IanD25/principia-diagnostics/issues)
+1. **Run the Quick Start** → Get a Tier-1 report on the included E. coli data
+2. **Add your own dataset** → Write a parser or follow the CSV convention
+3. **Review your report** → Understand what D_eff and coherence mean for your domain
+4. **Give feedback** → What was confusing? What would help? [Open an issue](https://github.com/IanD25/principia-diagnostics/issues)
 
 ---
 
@@ -416,7 +343,7 @@ For more: Open an issue on [GitHub](https://github.com/IanD25/principia-diagnost
 
 ## License & Attribution
 
-[PFD is licensed under MIT.](LICENSE) See [AUTHORS.md](AUTHORS.md) for contributors.
+[PFD is licensed under MIT.](LICENSE)
 
 **Citation:**
 ```bibtex
@@ -430,4 +357,4 @@ For more: Open an issue on [GitHub](https://github.com/IanD25/principia-diagnost
 
 ---
 
-**Questions?** Open an issue, email, or check the [FAQ](FAQ.md) (coming Phase 3).
+**Questions?** [Open an issue](https://github.com/IanD25/principia-diagnostics/issues) — we'd love to hear from you.

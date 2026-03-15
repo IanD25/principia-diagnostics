@@ -574,7 +574,7 @@ class HypothesisGenerator:
         surprise_threshold: float = 1.15,
     ) -> dict:
         """
-        Return a compact statistics dictionary (suitable for MCP tool output).
+        Return a compact statistics dictionary (suitable for programmatic access).
         Does not generate prompts to keep this fast.
         """
         pairs = self.find_surprising_pairs(

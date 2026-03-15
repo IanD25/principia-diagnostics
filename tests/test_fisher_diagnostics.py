@@ -613,7 +613,7 @@ class TestBuildWikiGraph:
 class TestDSWikiIntegration:
     """
     Integration tests against real ds_wiki.db.
-    Ground-truth checkpoints from FISHER_SUITE_SPEC.md §10.
+    Ground-truth checkpoints from Fisher Suite specification §10.
     """
 
     @pytest.fixture(scope="class")

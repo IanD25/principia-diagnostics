@@ -440,7 +440,7 @@ class LinkClassifier:
     ) -> str:
         """
         Format a single prompt for interactive classification by Claude.
-        Returns a string you can paste into a Claude conversation or MCP tool.
+        Returns a string you can paste into an LLM conversation for classification.
 
         The expected response format is a JSON array:
         [

@@ -937,5 +937,5 @@ class EntityCatalogPass:
 # ── Convenience wrapper ───────────────────────────────────────────────────────
 
 def run_entity_catalog_pass(bundle_db: str | Path) -> dict:
-    """Convenience wrapper used by scripts and MCP tools."""
+    """Convenience wrapper used by scripts and CLI."""
     return EntityCatalogPass(bundle_db).run()

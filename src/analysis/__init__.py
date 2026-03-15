@@ -12,7 +12,7 @@ Usage
     from analysis import HypothesisGenerator, CoverageAnalyzer
 
 Both classes accept the paths exported from config.py (SOURCE_DB, HISTORY_DB)
-so they integrate cleanly into the existing sync / MCP pipeline.
+so they integrate cleanly into the existing sync pipeline.
 """
 
 from analysis.hypothesis_generator import HypothesisGenerator, SurprisingPair, EntityInfo

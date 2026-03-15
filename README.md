@@ -1,5 +1,9 @@
 # Principia Diagnostics
 
+[![Tests](https://github.com/IanD25/principia-diagnostics/actions/workflows/tests.yml/badge.svg)](https://github.com/IanD25/principia-diagnostics/actions/workflows/tests.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 **Graph coherence engine for research datasets.**
 
 Give Principia a structured dataset — metabolic networks, taxonomies, power grids, chemical databases, knowledge graphs — and it produces a diagnostic report showing how internally coherent the dataset is and how well it grounds to known scientific foundations.

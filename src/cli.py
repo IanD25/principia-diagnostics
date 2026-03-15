@@ -94,7 +94,16 @@ def main():
         from pathlib import Path
 
         if args.file:
-            text = Path(args.file).read_text(encoding="utf-8")
+            file_path = Path(args.file)
+            if file_path.suffix.lower() == ".pdf":
+                # PDF extraction — section-aware claim extraction
+                from ingestion.parsers.pdf_parser import extract_to_claims
+                claims = extract_to_claims(file_path)
+                extractor = ClaimExtractor()
+                print(extractor.format_for_human_gate(claims))
+                return 0
+            else:
+                text = file_path.read_text(encoding="utf-8")
         elif args.text:
             text = args.text
         else:

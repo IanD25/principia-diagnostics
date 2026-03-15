@@ -3,21 +3,29 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "principia-diagnostics"
+name = "pfd"
 version = "0.3.0"
-description = "Graph coherence engine for research datasets"
+description = "Principia Formal Diagnostics — graph coherence engine for research datasets"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.11"
-authors = [{name = "Ian Darling"}]
-keywords = ["research", "diagnostics", "graph", "coherence", "fisher-information"]
+authors = [
+    {name = "Ian Darling"},
+]
+keywords = [
+    "fisher-information", "knowledge-graph", "research-validation",
+    "scientific-diagnostics", "dimensional-analysis", "graph-coherence",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 
 dependencies = [
@@ -26,22 +34,32 @@ dependencies = [
     "numpy>=2.0.0",
     "plotly>=5.0.0",
     "matplotlib>=3.8.0",
-    "networkx>=3.0",
+    "networkx>=3.0.0",
 ]
 
 [project.optional-dependencies]
+pdf = ["pymupdf>=1.24.0"]
+mcp = ["fastmcp>=2.0.0"]
 power = ["pandapower>=2.14.0"]
 dev = [
-    "principia-diagnostics[power]",
     "pytest>=9.0.0",
+    "pymupdf>=1.24.0",
+    "fastmcp>=2.0.0",
+    "pandapower>=2.14.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/IanD25/principia-diagnostics"
+Repository = "https://github.com/IanD25/principia-diagnostics"
+Issues = "https://github.com/IanD25/principia-diagnostics/issues"
 
 [project.scripts]
 pfd = "cli:main"
 
-[project.urls]
-Homepage = "https://github.com/IanD25/principia-diagnostics"
-Issues = "https://github.com/IanD25/principia-diagnostics/issues"
+# ── Setuptools configuration ──────────────────────────────────────────────────
+# src/ layout: everything under src/ is importable as a top-level package.
+# This means `from config import SOURCE_DB` and `from analysis.X import Y`
+# work after `pip install -e .` — matching the existing import style.
 
 [tool.setuptools.package-dir]
 "" = "src"
@@ -49,6 +67,14 @@ Issues = "https://github.com/IanD25/principia-diagnostics/issues"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.md"]
+
+# ── Pytest ────────────────────────────────────────────────────────────────────
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+    "integration: marks tests requiring real database files",
+]

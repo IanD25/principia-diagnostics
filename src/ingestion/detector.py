@@ -15,6 +15,7 @@ Supported formats (in detection order):
   zoo_classes_json  — Timeroot/ZooClasses (classes.json + theorems.json)
   cobra_json        — COBRA/BiGG metabolic model (reactions/metabolites/genes)
   flat_json         — Generic flat JSON array (Periodic Table, etc.)
+  paper_pdf         — Scientific paper PDF (requires pymupdf)
   frictionless      — Frictionless Data (datapackage.json)
   ro_crate          — RO-Crate (ro-crate-metadata.json)
   codemeta          — CodeMeta (codemeta.json)
@@ -79,6 +80,8 @@ def _detect_directory(directory: Path) -> str:
 
 
 def _detect_file(file: Path) -> str:
+    if file.suffix.lower() == ".pdf":
+        return "paper_pdf"
     if file.suffix not in (".json", ".JSON"):
         if file.name == "CITATION.cff":
             return "citation_cff"

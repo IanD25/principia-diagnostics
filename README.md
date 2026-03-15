@@ -94,7 +94,7 @@ python -m venv .venv
 pip install -e ".[dev]"
 
 # 4. Build the semantic index (first run downloads the embedding model)
-python -m src.sync
+python -m sync
 
 # 5. Run analysis (PYTHONUTF8=1 handles Unicode math symbols in the reference wiki)
 set PYTHONUTF8=1
@@ -110,7 +110,7 @@ git clone https://github.com/IanD25/principia-diagnostics.git
 cd principia-diagnostics
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-python3 -m src.sync          # Build semantic index (~1 min first run)
+python3 -m sync          # Build semantic index (~1 min first run)
 pfd --help
 ```
 
@@ -236,7 +236,7 @@ create_rrp_bundle("my_dataset.db", entries, links, sections, properties)
 | `python: command not found` | Python not installed or not in PATH | Install Python 3.11+ from [python.org](https://python.org) or via `brew install python@3.13` (Mac) |
 | `ModuleNotFoundError` after clone | Virtual environment not activated | Run `source .venv/bin/activate` first |
 | First run is slow (~5 min) | Downloading embedding model (~430MB) | Normal — only happens once. Model is cached locally after download. |
-| `sqlite3.OperationalError: no such table` | ChromaDB index not built | Run `python3 -m src.sync` |
+| `sqlite3.OperationalError: no such table` | ChromaDB index not built | Run `python3 -m sync` |
 | Unicode errors on Windows | Python not in UTF-8 mode | Set `PYTHONUTF8=1` before running commands |
 | `pfd: command not found` | Package not installed in editable mode | Run `pip install -e .` from the repo root |
 

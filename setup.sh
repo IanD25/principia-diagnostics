@@ -75,11 +75,11 @@ fi
 echo ""
 if [ -d "data/chroma_db" ] && [ -f "data/wiki_history.db" ]; then
     echo "✓ Semantic index already built"
-    echo "  Rebuild if needed: python3 -m src.sync"
+    echo "  Rebuild if needed: python3 -m sync"
 else
     echo "→ Building semantic index (first run — downloads ~430MB embedding model)..."
     echo "  This takes 1-2 minutes on first run."
-    python3 -m src.sync
+    python3 -m sync
     echo "✓ Semantic index built"
 fi
 

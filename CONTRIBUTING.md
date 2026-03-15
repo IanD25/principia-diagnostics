@@ -19,7 +19,7 @@ git clone https://github.com/IanD25/principia-diagnostics.git
 cd principia-diagnostics
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
-python -m src.sync               # build ChromaDB index
+python -m sync               # build ChromaDB index
 python -m pytest tests/ -v
 ```
 

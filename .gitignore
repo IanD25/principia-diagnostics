@@ -1,0 +1,38 @@
+# Virtual environment & caches
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Environment & secrets
+.env
+.env.*
+
+# Claude Code local settings
+.claude/
+
+# Generated artifacts (rebuilt by setup.sh)
+data/chroma_db/
+data/wiki_history.db
+
+# Generated visualizations
+backups/
+wiki_graph.html
+wiki_topology.png
+
+# SQLite journal files
+*.db-shm
+*.db-wal
+
+# Python packaging
+*.egg-info/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store

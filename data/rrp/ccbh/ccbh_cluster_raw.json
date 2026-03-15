@@ -1,0 +1,240 @@
+{
+  "metadata": {
+    "title": "CCBH Cluster: Cosmologically Coupled Black Holes and Dark Energy",
+    "papers": [
+      {
+        "id": "farrah2023",
+        "title": "Observational Evidence for Cosmological Coupling of Black Holes and its Implications for an Astrophysical Source of Dark Energy",
+        "authors": "Duncan Farrah et al.",
+        "journal": "ApJL 944 L31",
+        "year": 2023,
+        "arxiv_id": "2302.07878"
+      },
+      {
+        "id": "cadoni2025",
+        "title": "Cosmologically Coupled Black Holes with Regular Horizons",
+        "authors": "Mariano Cadoni, Leonardo de Lima, Mirko Pitzalis, Davi C. Rodrigues, Andrea P. Sanna",
+        "journal": "arXiv preprint",
+        "year": 2025
+      },
+      {
+        "id": "desi2025",
+        "title": "Positive Neutrino Masses with DESI DR2 via Matter Conversion to Dark Energy",
+        "authors": "S.P. Ahlen et al. (DESI Collaboration)",
+        "journal": "PRL 135 081003",
+        "year": 2025,
+        "doi": "10.1103/yb2k-kn7h"
+      }
+    ],
+    "note": "Three-paper cluster on cosmologically coupled black holes (CCBH). Central claim: BH mass grows as m proportional to a^k where k = -3*w_phys. For vacuum energy interior (w = -1), k = 3 = d_spatial."
+  },
+  "entries": [
+    {
+      "id": "kerr_incompatibility",
+      "title": "Kerr Solution Incompatibility with Cosmological Boundary Conditions",
+      "entry_type": "reference_law",
+      "paper": "farrah2023",
+      "section": "1 — Introduction",
+      "description": "The Kerr black hole solution reduces to flat spacetime at spatial infinity. This is incompatible with our universe, which is in concordance with a perturbed Robertson-Walker cosmology to sub-percent precision. Thus, regardless of singularities and horizons, Kerr is only appropriate for intervals of time short compared to the reciprocal expansion rate of the universe, and can only be consistently interpreted as an approximation to some more general solution. Efforts to construct a BH model in general relativity with realistic RW boundary conditions have been ongoing for nearly a century, starting with McVittie (1933) who generalized the Schwarzschild solution to arbitrary RW spacetimes."
+    },
+    {
+      "id": "cosmological_coupling_parameterization",
+      "title": "Cosmological Coupling Mass Parameterization: M(a) = M_i * (a/a_i)^k",
+      "entry_type": "mechanism",
+      "paper": "farrah2023",
+      "section": "1 — Introduction, Eq. 1",
+      "description": "Croker et al. (2021) give a parameterization of cosmologically coupled mass change in terms of the Robertson-Walker scale factor a: M(a) = M_i * (a/a_i)^k, where a_i is the scale factor at which the object becomes cosmologically coupled and k >= 0 is the cosmological coupling strength. The Nolan (1993) solution can be regarded as cosmologically coupled with k = 0 because its stress-energy evolves such that the mass remains fixed throughout the cosmological expansion. Vacuum energy interior solutions with cosmological boundaries have been predicted to produce k ~ 3, which is the maximum value for causal material with positive energy density (Croker and Weiner 2019). Cosmologically coupled mass change allows for experimental distinction between singular and non-singular BHs."
+    },
+    {
+      "id": "k_measurement_method",
+      "title": "Method: Inferring k from Elliptical Galaxy BH Mass Evolution",
+      "entry_type": "method",
+      "paper": "farrah2023",
+      "section": "2-3 — Samples, Results",
+      "description": "The value of k is determined by comparing supermassive black holes (BHs) in local elliptical galaxies to those in five samples of elliptical galaxies at z > 0.7. The pipeline developed by Farrah et al. (2023) draws realizations of each galaxy sample from the sample with reported uncertainties. The likelihood function applies expected measurement and selection bias corrections. The de-biased BH mass of each galaxy is shifted to its mass at z = 0 according to M(a) = M_i * (a/a_i)^k. Using the Epps-Singleton test, the high-redshift realization is compared against a realization of local ellipticals, where BH masses are shifted to z = 0 in the same way. The result is a probability that can be used to reject the hypothesis that the samples are drawn from the same distribution in the M_BH - M_stellar plane."
+    },
+    {
+      "id": "k_equals_3_measurement",
+      "title": "Measurement: k = 3.11 +1.19/-1.33 at 90% Confidence",
+      "entry_type": "measurement",
+      "paper": "farrah2023",
+      "section": "3 — Results, Eq. 2",
+      "description": "Combining the posterior distributions from five high-redshift samples compared against local elliptical galaxies gives k = 3.11 +1.19/-1.33 at 90% confidence, which excludes k = 0 at 99.98% confidence, equivalent to >3.9 sigma observational exclusion of the singular Kerr interior solution. The measurement is consistent with BHs possessing vacuum energy interiors, as first suggested by Gliner (1966). If fit to a Gaussian, the distribution has a mean of k = 3.09 with a standard deviation of 0.76. An independent comparison between WISE and COSMOS samples requiring no BH bias corrections finds a consistent value of k = 2.96 +1.65/-1.46."
+    },
+    {
+      "id": "vacuum_energy_interior",
+      "title": "Vacuum Energy Interior BH Model: k = 3 Implies w_phys = -1",
+      "entry_type": "mechanism",
+      "paper": "farrah2023",
+      "section": "3.1 — Implications",
+      "description": "The recovered value of k ~ 3 is consistent with supermassive black holes having vacuum energy interiors. The study makes the existence argument for a cosmologically realistic BH solution in GR with a non-singular vacuum energy interior. The cosmological coupling strength k is related to the physical equation of state by k = -3*w_phys (Croker et al. 2021). For vacuum energy (w_phys = -1), this gives k = 3. A population of k ~ 3 BHs will gain mass proportional to a^3. Within an RW cosmology, all objects dilute in number density proportional to a^(-3). When accretion becomes subdominant to growth by cosmological coupling, the energy density of k = 3 BHs remains cosmologically constant — they behave as dark energy."
+    },
+    {
+      "id": "bh_dark_energy_source",
+      "title": "BHs as Astrophysical Source of Dark Energy: Omega_Lambda from Star Formation",
+      "entry_type": "claim",
+      "paper": "farrah2023",
+      "section": "3.2 — Omega_Lambda from the Cosmic Star Formation History",
+      "description": "If k ~ 3 BHs contribute as a cosmological dark energy species, the question is whether they can contribute all of the observed Omega_Lambda. Testing this by assuming: (1) BHs couple with k = 3, (2) BHs are the only source for Omega_Lambda, and (3) BHs are made solely from the deaths of massive stars. Under these assumptions, the total BH mass from the cosmic history of star formation (and subsequent cosmological mass growth) should be consistent with Omega_Lambda = 0.68. A simple model of the cosmic star formation rate density shows consistency occurs with consumption of less than 3% of the baryon fraction Omega_b after cosmic dawn. The viable region is bounded by different initial mass function assumptions and accretion histories."
+    },
+    {
+      "id": "anisotropic_stress_distribution",
+      "title": "Anisotropic Stress and Spatial Distribution of CCBH Dark Energy",
+      "entry_type": "mechanism",
+      "paper": "farrah2023",
+      "section": "4.1 — Signatures in the CMB",
+      "description": "A population of k ~ 3 BHs are a dark energy species whose distribution in space need not trace baryons or dark matter at all times. Croker et al. (2020b) study the spatial distribution of k ~ 3 BHs with anisotropic stress at first order in cosmological perturbation theory. Anisotropic stress within individual BHs leads to an effective fluid at first order that resists clustering and can even drive the spatial distribution to uniformity. Resistance to clustering is computed from the non-singular interior equation of state. This prediction can be tested via CMB anomalies and gravitational lensing of gamma-ray bursts."
+    },
+    {
+      "id": "ce_general_solution",
+      "title": "General Solution for Cosmological Embedding of Spherically-Symmetric Objects",
+      "entry_type": "method",
+      "paper": "cadoni2025",
+      "section": "I-II — Introduction, Metric Ansatz and Field Equations",
+      "description": "Cadoni et al. present the most general and exact solution of Einstein's gravity sourced by an anisotropic fluid describing the cosmological embedding (CE) of a static and spherically-symmetric object, including black holes or exotic compact objects, without radial energy influx and in an arbitrary Friedmann-Lemaitre-Robertson-Walker (FLRW) cosmology. This is done fully considering backreaction of the local geometry on the cosmological dynamics. The metric ansatz uses conformal time eta and comoving radius r, with metric functions alpha(eta,r) and beta(eta,r) and scale factor a(eta). The source is an anisotropic fluid with energy density rho, radial pressure p_parallel, and transverse pressure p_perpendicular."
+    },
+    {
+      "id": "misner_sharp_mass",
+      "title": "Misner-Sharp Mass Parametrization and Local Object Mass",
+      "entry_type": "method",
+      "paper": "cadoni2025",
+      "section": "II.A — Parametrization in terms of local mass functions",
+      "description": "The field equations are parametrized in terms of a local mass function M_MS^l, which is the Misner-Sharp mass of the compact object with the purely cosmological contribution subtracted: M_MS^l(r,eta) = M_MS(r,eta) - (4*pi/3)*ell^3*rho_c, where ell = a*r is the areal radius. For compact objects, the cosmological contribution can be neglected, giving M_MS^l approximately equal to M_MS. This parametrization is physically appealing as it employs the standard cosmological time coordinate, the comoving radius, and a natural definition of the mass of the cosmologically embedded object. The system admits a uniquely-defined solution once the free function M_MS^l is specified, together with suitable boundary conditions."
+    },
+    {
+      "id": "regular_horizon_solution",
+      "title": "Regular Horizon Solutions: Curvature Singularity Removal via Backreaction",
+      "entry_type": "claim",
+      "paper": "cadoni2025",
+      "section": "II.B, III — Exact Solutions, Cosmological Embedding of BHs",
+      "description": "The solution is free of curvature singularities at the would-be BH event horizon, solving a main issue of cosmologically embedded BH solutions proposed so far. The general solution encodes both local object properties and cosmological dynamics. The dependence on the cosmological energy density rho_c represents a dynamical interplay between large-scale cosmological dynamics and the local geometry. Crucially, it is the presence of rho_c in the metric functions that allows avoidance of curvature singularities at the would-be event horizon. Previous CE solutions like McVittie's exhibit horizon singularities. The present construction is fully consistent with the theorem of Faraoni and Rinaldi (2024), which forbids static event horizons in any CE of BH solutions, since only apparent horizons (not static event horizons) are present."
+    },
+    {
+      "id": "ce_schwarzschild",
+      "title": "New Cosmological Embedding of Schwarzschild BH (Distinct from McVittie)",
+      "entry_type": "claim",
+      "paper": "cadoni2025",
+      "section": "III — Cosmological Embedding of Known BH Solutions",
+      "description": "As a byproduct of the general solution, a new cosmological embedding of the Schwarzschild BH is derived that is distinct from McVittie's original proposal and is regular everywhere except at the central singularity. The simplest class of CE solutions is obtained by promoting the radial coordinate r to the areal radius ell = a*r in the static BH mass profile M(r). This method was first introduced by McVittie working in isotropic coordinates. Two different classes of exact solutions can be constructed: the first (Eq. 25) inherits the static horizon singularity, while the second class (Eq. 28) uses the full backreaction-including solution and is free from this singularity."
+    },
+    {
+      "id": "energy_conditions",
+      "title": "Energy Conditions: WEC Satisfied in BH Exterior, DEC Violations Near Horizon",
+      "entry_type": "measurement",
+      "paper": "cadoni2025",
+      "section": "IV — Energy Conditions",
+      "description": "When interpreted as effective models within General Relativity, the fluid sourcing the CC BH solutions involves exotic matter. The weak energy condition (WEC) is satisfied in the BH exterior. For the solution class including backreaction (Eq. 28), the WEC is restored in the BH exterior specifically because of the backreaction term. The dominant energy condition (DEC) is violated in certain spacetime regions, typically near the horizon. For a generic equation of state of the cosmological fluid with w >= 0, the DEC is satisfied asymptotically but violated near the horizon. These violations at the effective fluid level do not necessarily imply fundamental violations at the microscopic level, since the anisotropic fluid is a coarse-grained description."
+    },
+    {
+      "id": "ccbh_desi_model",
+      "title": "CCBH Model: Dark Energy Production via Baryon Consumption",
+      "entry_type": "mechanism",
+      "paper": "desi2025",
+      "section": "Introduction — CCBH Model, Eq. 1",
+      "description": "The DESI collaboration models dark energy (DE) production via baryon consumption using cosmologically coupled black holes (CCBHs). The conversion of supranuclear densities into energized vacuum during stellar gravitational collapse is analogous to the time reversal of inflationary reheating. It has been established from the Einstein-Hilbert action that ultra-compact regions of energized vacuum can become cosmologically coupled, impacting global dynamics in aggregate as a w_phys >= -1 species. Locally, each BH becomes tightly coupled to the embedding cosmology and grows in mass m proportional to a^k, independently of accretion or merger. The cosmological coupling strength k = -3*w_phys is determined in GR by the particular CCBH model solution adopted. Models with w_phys = -1 exhibit m proportional to a^3, so dilution in number density proportional to 1/a^3 gives a cosmologically constant physical density."
+    },
+    {
+      "id": "de_density_equation",
+      "title": "Dark Energy Density Equation from Star Formation Rate",
+      "entry_type": "method",
+      "paper": "desi2025",
+      "section": "Introduction — Eq. 1",
+      "description": "The DE density in the CCBH model is: rho = C*omega_b^proj*a^3 for a < a_i (before star formation), and rho = C*omega_b^proj*a^3 - (Xi/a^3)*integral(H*psi*a'^3 da', a_i to a) for a >= a_i, where C is a dimensionful constant, H is the Hubble rate, psi is the observed comoving star-formation rate density (SFRD), and Xi converts stellar mass into DE energy density. The CCBH model has the same number of free parameters as LambdaCDM. DE production is determined by the cosmic star formation rate density, allowing for distinct early- and late-time cosmologies. Two SFRDs are used to bracket current observations: Trinca psi (based on HST and JWST data with a semianalytic model) and Madau psi."
+    },
+    {
+      "id": "desi_bao_data",
+      "title": "DESI DR2 BAO Measurements: Over 14 Million Extragalactic Targets",
+      "entry_type": "measurement",
+      "paper": "desi2025",
+      "section": "Introduction, Data",
+      "description": "The Dark Energy Spectroscopic Instrument (DESI) is a massively parallel spectroscopic survey on the Mayall telescope at Kitt Peak, which has released measurements of baryon acoustic oscillations determined from over 14 million extragalactic targets. DESI's five-year observational campaign aims to collect more than 40 million galaxy and quasar spectra. The DESI DR2 data are combined with CMB datasets (Planck PR4 LOLLIPOP and HILLIPOP for TT, TE, EE, lowE, and COMMANDER 2018 for lowTT) to search for evidence of matter conversion to dark energy."
+    },
+    {
+      "id": "positive_neutrino_mass",
+      "title": "Positive Neutrino Masses: Sum_m_nu Peaked at 0.05-0.1 eV",
+      "entry_type": "measurement",
+      "paper": "desi2025",
+      "section": "Results — Fig. 3, Table I",
+      "description": "A main result of the DESI paper: the CCBH model yields posterior probability densities for the summed neutrino mass that peak at positive mass, about 0.05 eV for Trinca psi (with sum_m_nu < 0.149 eV at 95% confidence) and sum_m_nu = 0.106 +0.059/-0.050 eV for Madau psi. This is in good agreement with lower limits from neutrino oscillation experiments. In contrast, the LambdaCDM analysis peaks at negative mass, which is unphysical. The positive peak occurs because conversion of matter to dark energy in CCBHs allows larger summed neutrino mass without changing the total matter density preferred by observations. The decrease in baryon density allows the model to remain consistent with the expansion history measured by DESI and CMB data."
+    },
+    {
+      "id": "hubble_tension_reduction",
+      "title": "Hubble Tension Reduction: 4.2 sigma to 2.7-3.3 sigma",
+      "entry_type": "measurement",
+      "paper": "desi2025",
+      "section": "Results — Fig. 2",
+      "description": "The CCBH model reduces tension with the local distance ladder measurement of H_0. The tension (difference between mean values divided by uncertainties summed in quadrature) reduces from 4.2 sigma in LambdaCDM to 3.3 sigma for Trinca psi and 2.7 sigma for Madau psi. The CCBH Trinca psi model successfully aligns the posterior maxima from both BAO and CMB datasets, resolving a tension present in the baseline LambdaCDM analysis. This alignment is sensitive to the star-formation history: the Madau psi model overcorrects."
+    },
+    {
+      "id": "expansion_history_recovery",
+      "title": "CCBH Accurately Recovers Cosmological Expansion History",
+      "entry_type": "measurement",
+      "paper": "desi2025",
+      "section": "Results — Fig. 1",
+      "description": "The CCBH model accurately recovers the cosmological expansion history as measured by DESI DR2 BAO. Differences in BAO observables (transverse comoving distance D_M, Hubble distance D_H proportional to 1/H, and volume-averaged distance D_V) relative to the Planck fiducial LambdaCDM cosmology show that the CCBH Trinca psi model is statistically indistinguishable from LambdaCDM. The Madau psi model is disfavored at approximately 2 sigma based on Delta_chi^2_MAP, driven primarily by BAO with a small contribution from the high-l CMB."
+    },
+    {
+      "id": "phantom_crossing_explanation",
+      "title": "Physical Explanation for Phantom Crossing in w_0-w_a Parameterization",
+      "entry_type": "claim",
+      "paper": "desi2025",
+      "section": "Introduction — Phantom Crossing",
+      "description": "A salient feature of the best-fit DESI w_0-w_a CDM models is the presence of a phantom crossing, where the effective DE equation of state w_eff crosses from w < -1 to w >= -1. If taken literally, this feature is acausal. However, it can be understood from the source-free conservation relation: w_eff = -1 - (a/3*rho)*d(rho)/da. When physical densities in an expanding universe remain constant or dilute, w_eff >= -1. But if data demand d(rho)/da > 0, the effective w_eff appears phantom. In the CCBH scenario, energy is injected from matter (baryons) into the DE species, so the underlying physics remains causal. The phantom crossing is an artifact of interpreting a matter-to-DE conversion through a single-species equation of state."
+    },
+    {
+      "id": "k_float_result",
+      "title": "Floating k Recovery: k = 2.74 +/- 0.14 from DESI+CMB",
+      "entry_type": "measurement",
+      "paper": "desi2025",
+      "section": "Discussion",
+      "description": "Allowing k to float in the Baseline analysis (DESI DR2 + CMB) recovers k = 2.74 +/- 0.14, consistent with energized vacuum non-singular BHs (k = 3) at 1.9 sigma. Including Pantheon+ supernovae recovers k = 2.70 +/- 0.10, increasing the preference for thawing to 3 sigma. However, in both cases H_0 decreases, uncertainty in sum_m_nu increases, and a positive peak in the neutrino mass posterior is lost. This suggests that fixing k = 3 (pure vacuum energy interior) provides the most predictive and observationally consistent model, but mild departures (k slightly less than 3) may be favored by certain data combinations."
+    },
+    {
+      "id": "missing_baryons",
+      "title": "Missing Baryons Problem: Trinca psi Predicts omega_b/omega_b^proj ~ 0.7",
+      "entry_type": "claim",
+      "paper": "desi2025",
+      "section": "Results",
+      "description": "The Trinca psi CCBH model provides a novel explanation for the observational Missing Baryons Problem, predicting omega_b = omega_b^proj * 0.7, meaning approximately 30% of baryons have been converted to dark energy through BH formation and cosmological coupling. The Madau scenario, which consumes approximately twice as many baryons, is at approximately 2 sigma tension with this. This baryon consumption is what enables the positive neutrino mass measurement: late-time baryon consumption allows neutrino masses to rise toward observational lower bounds because baryons are converted into DE, allowing neutrino masses to increase without decreasing the expansion rate."
+    },
+    {
+      "id": "bbn_consistency",
+      "title": "CCBH Model Agrees with Early-Time Baryon Abundance from BBN",
+      "entry_type": "measurement",
+      "paper": "desi2025",
+      "section": "Abstract, Results",
+      "description": "The CCBH model agrees with early-time baryon abundance measured by Big Bang Nucleosynthesis (BBN). Because the CCBH model uses projected baryon densities (omega_b^proj) that represent the primordial baryon density before any conversion to dark energy, early-universe physics (BBN, CMB recombination) proceeds exactly as in LambdaCDM. The baryon consumption only begins after stellar first light at z ~ 25, well after BBN (z ~ 10^9) and recombination (z ~ 1100). This separation of timescales means the CCBH model inherits all LambdaCDM successes in the early universe."
+    }
+  ],
+  "links": [
+    {"source": "kerr_incompatibility", "target": "cosmological_coupling_parameterization", "type": "motivates"},
+    {"source": "cosmological_coupling_parameterization", "target": "k_measurement_method", "type": "provides_framework_for"},
+    {"source": "k_measurement_method", "target": "k_equals_3_measurement", "type": "produces"},
+    {"source": "k_equals_3_measurement", "target": "vacuum_energy_interior", "type": "supports"},
+    {"source": "vacuum_energy_interior", "target": "bh_dark_energy_source", "type": "implies"},
+    {"source": "bh_dark_energy_source", "target": "anisotropic_stress_distribution", "type": "predicts"},
+    {"source": "cosmological_coupling_parameterization", "target": "ce_general_solution", "type": "is_formalized_by"},
+    {"source": "ce_general_solution", "target": "misner_sharp_mass", "type": "uses"},
+    {"source": "misner_sharp_mass", "target": "regular_horizon_solution", "type": "enables"},
+    {"source": "regular_horizon_solution", "target": "ce_schwarzschild", "type": "produces"},
+    {"source": "regular_horizon_solution", "target": "energy_conditions", "type": "satisfies"},
+    {"source": "ce_general_solution", "target": "regular_horizon_solution", "type": "produces"},
+    {"source": "vacuum_energy_interior", "target": "ccbh_desi_model", "type": "provides_physical_basis_for"},
+    {"source": "ccbh_desi_model", "target": "de_density_equation", "type": "is_quantified_by"},
+    {"source": "de_density_equation", "target": "desi_bao_data", "type": "is_constrained_by"},
+    {"source": "desi_bao_data", "target": "positive_neutrino_mass", "type": "yields"},
+    {"source": "desi_bao_data", "target": "hubble_tension_reduction", "type": "yields"},
+    {"source": "desi_bao_data", "target": "expansion_history_recovery", "type": "yields"},
+    {"source": "ccbh_desi_model", "target": "phantom_crossing_explanation", "type": "explains"},
+    {"source": "desi_bao_data", "target": "k_float_result", "type": "produces"},
+    {"source": "k_float_result", "target": "k_equals_3_measurement", "type": "is_consistent_with"},
+    {"source": "ccbh_desi_model", "target": "missing_baryons", "type": "predicts"},
+    {"source": "missing_baryons", "target": "positive_neutrino_mass", "type": "enables"},
+    {"source": "ccbh_desi_model", "target": "bbn_consistency", "type": "is_consistent_with"},
+    {"source": "k_equals_3_measurement", "target": "ccbh_desi_model", "type": "provides_coupling_constant_for"},
+    {"source": "regular_horizon_solution", "target": "vacuum_energy_interior", "type": "provides_singularity_free_model_for"},
+    {"source": "positive_neutrino_mass", "target": "expansion_history_recovery", "type": "is_consistent_with"},
+    {"source": "kerr_incompatibility", "target": "ce_general_solution", "type": "motivates"},
+    {"source": "energy_conditions", "target": "vacuum_energy_interior", "type": "constrains"}
+  ]
+}

@@ -4,9 +4,27 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-**Graph coherence engine for research datasets.**
+**LLM-driven graph coherence engine for research datasets.**
 
-Give Principia a structured dataset — metabolic networks, taxonomies, power grids, chemical databases, knowledge graphs — and it produces a diagnostic report showing how internally coherent the dataset is and how well it grounds to known scientific foundations.
+Principia is designed to be **operated by an LLM code assistant** (Claude Code, Cursor, Cline, or any MCP-compatible agent) with human oversight at key decision points. The LLM orchestrates a 6-step diagnostic pipeline, interprets results in natural language, and surfaces structural patterns that would be invisible in manual analysis. The CLI provides direct access to the same pipeline for scripting or manual use.
+
+Give it a structured dataset — metabolic networks, taxonomies, power grids, chemical databases, knowledge graphs — and it produces a diagnostic report showing how internally coherent the dataset is and how well it grounds to known scientific foundations.
+
+### How It's Meant to Be Used
+
+```
+Human: "Analyze this metabolic network for me"
+    ↓
+LLM reads CLAUDE.md → learns the pipeline → runs each step
+    ↓
+LLM: "PFD Score 0.973 — internally consistent, well-integrated.
+      Top hub: pyruvate (D_eff=11). Strongest reference anchor: CHEM5.
+      HTML reports saved — open data/reports/ in your browser."
+```
+
+The LLM handles orchestration, the human handles judgment calls (especially claim review in Phase 3 paper analysis). See [`CLAUDE.md`](CLAUDE.md) for the full LLM instruction set.
+
+**Manual use is fully supported** — every command works without an LLM. But the system was architected for LLM orchestration first: the knowledge graph traversal, multi-step reasoning, and natural language interpretation are where an LLM adds the most value.
 
 ## What It Does
 
@@ -265,6 +283,7 @@ networkx               # Graph analysis
 
 ```
 principia-diagnostics/
+|-- CLAUDE.md              # LLM orchestration guide (auto-loaded by Claude Code)
 |-- src/
 |   |-- config.py              # All paths, model config, thresholds
 |   |-- sync.py                # Rebuild ChromaDB from ds_wiki.db
@@ -298,6 +317,7 @@ principia-diagnostics/
 
 ## Design Philosophy
 
+- **LLM-orchestrated, human-governed** — an LLM drives the pipeline; humans make judgment calls
 - **Diagnostic, not judge** — reports show reasoning, not verdicts
 - **Probabilistic, not boolean** — confidence scores (0-1), never VALID/INVALID
 - **Transparent** — every output shows full reasoning chain

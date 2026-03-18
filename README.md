@@ -4,32 +4,55 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-**LLM-driven graph coherence engine for research datasets.**
+**An LLM-operated graph coherence engine for research datasets.**
 
-Principia is designed to be **operated by an LLM code assistant** (Claude Code, Cursor, Cline, or any MCP-compatible agent) with human oversight at key decision points. The LLM orchestrates a 6-step diagnostic pipeline, interprets results in natural language, and surfaces structural patterns that would be invisible in manual analysis. The CLI provides direct access to the same pipeline for scripting or manual use.
+> **This is not a traditional CLI tool.** Principia is designed to be **driven by an LLM code assistant** — Claude Code, Cursor, Cline, or any agent that can read files and run shell commands. The LLM reads [`CLAUDE.md`](CLAUDE.md) on session start, which contains the complete pipeline instructions. The human provides datasets and makes judgment calls; the LLM handles orchestration, interpretation, and reporting.
 
 Give it a structured dataset — metabolic networks, taxonomies, power grids, chemical databases, knowledge graphs — and it produces a diagnostic report showing how internally coherent the dataset is and how well it grounds to known scientific foundations.
 
-### How It's Meant to Be Used
+---
+
+## How This Is Meant to Be Used
+
+### Primary: LLM-Driven (Recommended)
+
+The intended workflow is human + LLM code assistant:
 
 ```
-Human: "Analyze this metabolic network for me"
-    ↓
-LLM reads CLAUDE.md → learns the pipeline → runs each step
-    ↓
-LLM: "PFD Score 0.973 — internally consistent, well-integrated.
-      Top hub: pyruvate (D_eff=11). Strongest reference anchor: CHEM5.
-      HTML reports saved — open data/reports/ in your browser."
+1. Clone repo, run setup.sh
+2. Open the project in an LLM code assistant (Claude Code, Cursor, etc.)
+3. The LLM auto-loads CLAUDE.md — the full pipeline instruction set
+4. Tell the LLM what you want:
+
+   Human: "Analyze this metabolic network for me"
+       ↓
+   LLM reads CLAUDE.md → runs each pipeline step → interprets results
+       ↓
+   LLM: "PFD Score 0.973 — internally consistent, well-integrated.
+         Top hub: pyruvate (D_eff=11). Strongest reference anchor: CHEM5.
+         HTML reports saved — open data/reports/ in your browser."
+
+5. The LLM can also:
+   - Write a new parser for your data format
+   - Explain why a dataset scored the way it did
+   - Compare structural patterns across datasets
+   - Walk you through claim extraction from papers (with human review gate)
 ```
 
-The LLM handles orchestration, the human handles judgment calls (especially claim review in Phase 3 paper analysis). See [`CLAUDE.md`](CLAUDE.md) for the full LLM instruction set.
+**Why LLM-first?** The pipeline involves multi-step reasoning, knowledge graph traversal, and natural language interpretation of structural patterns. An LLM turns raw diagnostic output into actionable insight — "pyruvate is the top hub because it sits at the TCA/glycolysis intersection" rather than just "node met_pyr_c: D_eff=11."
 
-**Manual use is fully supported** — every command works without an LLM. But the system was architected for LLM orchestration first: the knowledge graph traversal, multi-step reasoning, and natural language interpretation are where an LLM adds the most value.
+[`CLAUDE.md`](CLAUDE.md) is the complete LLM instruction set — it covers every pipeline step, what to check, what to report, and when to pause for human judgment.
+
+### Secondary: Manual CLI
+
+Every command also works without an LLM for scripting or manual use:
 
 ## What It Does
 
+The LLM (or CLI) drives a 6-step diagnostic pipeline:
+
 ```
-Your Dataset (CSV / JSON / MATPOWER / custom)
+Your Dataset (CSV / JSON / MATPOWER / PDF / custom)
     |
 [1] INGEST         -> entries + links -> rrp_*.db (SQLite)
 [2] BUILD GRAPH    -> NetworkX internal graph
@@ -42,6 +65,8 @@ Your Dataset (CSV / JSON / MATPOWER / custom)
     |
 [6] PFD SCORE      -> 0.0-1.0 combined diagnostic verdict with full reasoning
 ```
+
+When driven by an LLM, each step includes natural language interpretation — the LLM explains *what* the numbers mean and *why* the dataset scored the way it did. When used manually via CLI, you get the raw diagnostic output.
 
 **Key principle:** No black-box verdicts. Every score shows its full reasoning chain — what was measured, what thresholds applied, and why.
 
@@ -78,22 +103,20 @@ git clone https://github.com/IanD25/principia-diagnostics.git
 cd principia-diagnostics
 
 # 2. Run the setup script
-#    This will:
-#    - Create a Python virtual environment (.venv/)
-#    - Install all dependencies via pip
-#    - Download the BGE embedding model (~430MB, one-time)
-#    - Build the semantic search index from the reference wiki
-#    - Optionally run the test suite
-#
-#    First run takes 2-5 minutes depending on internet speed.
+#    Creates venv, installs deps, downloads embedding model (~430MB),
+#    builds semantic index. First run takes 2-5 minutes.
 bash setup.sh
 
 # 3. Activate the virtual environment
-#    (setup.sh does this internally, but you need to do it
-#     again in each new terminal window)
 source .venv/bin/activate
 
-# 4. Run your first analysis
+# 4a. LLM-driven (recommended): Open in your LLM code assistant
+#     Claude Code:  claude
+#     Cursor:       Open folder in Cursor
+#     The LLM auto-loads CLAUDE.md and knows the full pipeline.
+#     Just tell it: "Analyze the E. coli dataset for me"
+
+# 4b. Manual CLI:
 pfd report --rrp data/rrp/ecoli_core/rrp_ecoli_core.db
 ```
 
@@ -283,7 +306,7 @@ networkx               # Graph analysis
 
 ```
 principia-diagnostics/
-|-- CLAUDE.md              # LLM orchestration guide (auto-loaded by Claude Code)
+|-- CLAUDE.md              # LLM INSTRUCTION SET — auto-loaded by Claude Code / Cursor / Cline
 |-- src/
 |   |-- config.py              # All paths, model config, thresholds
 |   |-- sync.py                # Rebuild ChromaDB from ds_wiki.db
@@ -317,7 +340,8 @@ principia-diagnostics/
 
 ## Design Philosophy
 
-- **LLM-orchestrated, human-governed** — an LLM drives the pipeline; humans make judgment calls
+- **LLM-first architecture** — the system is designed to be operated by an LLM code assistant, with [`CLAUDE.md`](CLAUDE.md) as the machine-readable instruction set. The CLI exists for scripting and manual fallback, but the primary interface is natural language via an LLM.
+- **Human-governed** — the LLM orchestrates; humans make judgment calls (especially claim review in paper analysis)
 - **Diagnostic, not judge** — reports show reasoning, not verdicts
 - **Probabilistic, not boolean** — confidence scores (0-1), never VALID/INVALID
 - **Transparent** — every output shows full reasoning chain

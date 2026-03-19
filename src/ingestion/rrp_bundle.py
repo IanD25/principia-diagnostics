@@ -108,11 +108,27 @@ def _apply_schema(conn: sqlite3.Connection) -> None:
         created_at          TEXT DEFAULT (datetime('now'))
     );
 
+    -- ── Math interpretation table (Phase 3A — formula annotations) ───────────
+
+    CREATE TABLE IF NOT EXISTS math_interpretations (
+        id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+        entry_id            TEXT NOT NULL REFERENCES entries(id),
+        claim_index         INTEGER,                -- index into extracted claims (NULL if standalone)
+        formula             TEXT,                    -- best-effort symbolic (may be garbled from PDF)
+        plain_english       TEXT NOT NULL,           -- "what the math says" in natural language
+        what_it_constrains  TEXT,                    -- physical/logical constraint the formula imposes
+        ds_wiki_anchor      TEXT,                    -- DS Wiki entry ID this formula relates to (e.g. EM3)
+        source_section      TEXT,                    -- which paper section the formula appears in
+        human_verified      INTEGER DEFAULT 0,       -- 1 = human confirmed interpretation is correct
+        created_at          TEXT DEFAULT (datetime('now'))
+    );
+
     CREATE INDEX IF NOT EXISTS idx_links_source   ON links(source_id);
     CREATE INDEX IF NOT EXISTS idx_links_target   ON links(target_id);
     CREATE INDEX IF NOT EXISTS idx_sections_entry ON sections(entry_id);
     CREATE INDEX IF NOT EXISTS idx_bridges_rrp    ON cross_universe_bridges(rrp_entry_id);
     CREATE INDEX IF NOT EXISTS idx_bridges_ds     ON cross_universe_bridges(ds_entry_id);
+    CREATE INDEX IF NOT EXISTS idx_math_entry     ON math_interpretations(entry_id);
     """)
     conn.commit()
     _migrate_schema(conn)
@@ -125,6 +141,28 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         conn.execute("ALTER TABLE links ADD COLUMN stoichiometry_coef REAL")
         conn.commit()
 
+    # v1.2: math_interpretations table
+    tables = {row[0] for row in conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table'"
+    ).fetchall()}
+    if "math_interpretations" not in tables:
+        conn.executescript("""
+        CREATE TABLE IF NOT EXISTS math_interpretations (
+            id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            entry_id            TEXT NOT NULL REFERENCES entries(id),
+            claim_index         INTEGER,
+            formula             TEXT,
+            plain_english       TEXT NOT NULL,
+            what_it_constrains  TEXT,
+            ds_wiki_anchor      TEXT,
+            source_section      TEXT,
+            human_verified      INTEGER DEFAULT 0,
+            created_at          TEXT DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_math_entry ON math_interpretations(entry_id);
+        """)
+        conn.commit()
+
 
 def _insert_meta(conn: sqlite3.Connection, name: str, source: str, fmt: str) -> None:
     now = datetime.now(timezone.utc).isoformat()
@@ -133,7 +171,7 @@ def _insert_meta(conn: sqlite3.Connection, name: str, source: str, fmt: str) -> 
         ("source",       source),
         ("format",       fmt),
         ("ingested_at",  now),
-        ("schema_version", "1.1"),
+        ("schema_version", "1.2"),
     ]
     conn.executemany(
         "INSERT OR REPLACE INTO rrp_meta (key, value) VALUES (?, ?)", rows
@@ -155,6 +193,7 @@ def bundle_stats(conn: sqlite3.Connection) -> dict:
         ("links", "id"),
         ("entry_properties", "id"),
         ("cross_universe_bridges", "id"),
+        ("math_interpretations", "id"),
     ]:
         row = conn.execute(f"SELECT COUNT({col}) FROM {table}").fetchone()
         stats[f"total_{table}"] = row[0]

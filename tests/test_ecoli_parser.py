@@ -386,7 +386,7 @@ class TestRrpMeta:
     def test_schema_version(self, conn):
         row = conn.execute("SELECT value FROM rrp_meta WHERE key='schema_version'").fetchone()
         assert row is not None
-        assert row[0] == "1.1"
+        assert row[0] in ("1.1", "1.2")  # 1.2 adds math_interpretations table
 
     def test_stoichiometry_coef_column_exists(self, conn):
         cols = {row[1] for row in conn.execute("PRAGMA table_info(links)").fetchall()}

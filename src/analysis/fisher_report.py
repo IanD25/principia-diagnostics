@@ -89,9 +89,13 @@ class PFDReport:
     tier2_anchor_load:         list  # list[AnchorLoad], sorted by n_bridges desc
     tier2_uncovered_count:     int   # RRP entries with no bridge above min_sim
 
+    # Formality (Phase 4.3)
+    formality_weight:    float = 1.0    # mean formality weight of bridged anchors
+    formality_breakdown: dict  = field(default_factory=dict)  # {tier: count}
+
     # Overall
-    pfd_score:   float   # 0.0–1.0
-    summary:     str     # 1–2 sentence natural language summary
+    pfd_score:   float   = 0.0   # 0.0–1.0
+    summary:     str     = ""    # 1–2 sentence natural language summary
 
     def as_dict(self) -> dict:
         d = asdict(self)
@@ -189,6 +193,17 @@ class PFDReport:
                 lines.append(
                     f"    {a['wiki_id']:<16} {a['n_bridges']} RRP entries"
                 )
+
+        # Formality breakdown (Phase 4.3)
+        if self.formality_breakdown:
+            t1c = self.formality_breakdown.get(1, 0)
+            t2c = self.formality_breakdown.get(2, 0)
+            t3c = self.formality_breakdown.get(3, 0)
+            lines.append(
+                f"  Formality tiers   : "
+                f"{t1c} Tier-1 | {t2c} Tier-2 | {t3c} Tier-3"
+                f"  (weight={self.formality_weight:.3f})"
+            )
 
         lines += [
             thin,
@@ -363,9 +378,33 @@ def generate_report(
         key=lambda x: -x["n_bridges"],
     )[:top_n]
 
+    # ── Formality tier integration (Phase 4.3) ────────────────────────────────
+    # Load formality tiers from DS Wiki
+    wiki_conn = sqlite3.connect(wiki_db)
+    wiki_cols = {row[1] for row in wiki_conn.execute("PRAGMA table_info(entries)")}
+    formality_tiers: dict[str, int] = {}
+    if "formality_tier" in wiki_cols:
+        formality_tiers = {
+            row[0]: row[1]
+            for row in wiki_conn.execute("SELECT id, formality_tier FROM entries")
+            if row[1] is not None
+        }
+    wiki_conn.close()
+
+    # Compute mean formality weight across all bridged DS Wiki anchors
+    _fw_map = {1: 1.0, 2: 0.85, 3: 0.70}
+    anchor_tiers = [formality_tiers.get(nid.replace("wiki::", ""), 2)
+                    for nid in anchor_counts]
+    formality_breakdown_counts: dict[int, int] = {}
+    for t in anchor_tiers:
+        formality_breakdown_counts[t] = formality_breakdown_counts.get(t, 0) + 1
+    anchor_weights = [_fw_map.get(t, 0.85) for t in anchor_tiers]
+    mean_fw = sum(anchor_weights) / max(len(anchor_weights), 1) if anchor_weights else 1.0
+
     # ── PFD score ─────────────────────────────────────────────────────────────
     tier1_score = coherence
-    tier2_score = bridge_frac * (1.0 - noise_frac2)
+    tier2_raw   = bridge_frac * (1.0 - noise_frac2)
+    tier2_score = tier2_raw * mean_fw
     pfd_score   = round(0.5 * tier1_score + 0.5 * tier2_score, 4)
 
     # ── Natural language summary ──────────────────────────────────────────────
@@ -407,6 +446,9 @@ def generate_report(
         tier2_strongest_bridges=strongest,
         tier2_anchor_load=anchor_load,
         tier2_uncovered_count=n2_uncovered,
+        # Formality (Phase 4.3)
+        formality_weight=round(mean_fw, 4),
+        formality_breakdown=formality_breakdown_counts,
         # Overall
         pfd_score=pfd_score,
         summary=summary,

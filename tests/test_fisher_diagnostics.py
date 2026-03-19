@@ -613,7 +613,7 @@ class TestBuildWikiGraph:
 class TestDSWikiIntegration:
     """
     Integration tests against real ds_wiki.db.
-    Ground-truth checkpoints from Fisher Suite specification §10.
+    Ground-truth checkpoints from FISHER_SUITE_SPEC.md §10.
     """
 
     @pytest.fixture(scope="class")
@@ -711,7 +711,8 @@ class TestBridgeFilterUnit:
         assert score.ds_entry_id  == ds_id
         assert score.cosine_sim   == pytest.approx(0.85)
         assert 0.0 <= score.eta   <= 1.0
-        assert score.trust_score  == pytest.approx((1.0 - score.eta) * 0.85)
+        # Phase 4.3: trust_score = (1 - eta) * sim * formality_weight(default=2 → 0.85)
+        assert score.trust_score  == pytest.approx((1.0 - score.eta) * 0.85 * 0.85)
 
     def test_score_bridge_absent_node_degenerate(self):
         """DS Wiki node not in sweep → eta=1.0, DEGENERATE, is_structured=False."""
@@ -732,14 +733,15 @@ class TestBridgeFilterUnit:
         assert score.is_structured is False
 
     def test_trust_score_formula(self):
-        """trust_score = (1 - eta) * cosine_sim exactly."""
+        """trust_score = (1 - eta) * cosine_sim * formality_weight."""
         G = _str_graph(nx.complete_graph(6))
         sweep = sweep_graph(G, "mock", KernelType.EXPONENTIAL)
         non_skipped = [r for r in sweep.results.values() if not r.skipped]
         assert non_skipped
         r = non_skipped[0]
         score = score_bridge("a", r.node_id, 0.75, sweep)
-        assert score.trust_score == pytest.approx((1.0 - score.eta) * 0.75, abs=1e-9)
+        # Phase 4.3: default tier=2, formality_weight=0.85
+        assert score.trust_score == pytest.approx((1.0 - score.eta) * 0.75 * 0.85, abs=1e-9)
 
     def test_filter_bridges_splits_correctly(self):
         """filter_bridges: len(trusted) + len(noise) == len(input)."""

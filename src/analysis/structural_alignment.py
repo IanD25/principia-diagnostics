@@ -66,9 +66,10 @@ class BridgeAlignment:
     ds_entry_title: str
     raw_sim: float           # cosine similarity (unsigned)
     polarity: float          # [-1, +1] derived from link graph
-    signed_score: float      # raw_sim × polarity  (0.0 if polarity==0)
+    signed_score: float      # raw_sim × polarity × formality_weight
     path_description: str    # human-readable derivation
     hop: int                 # 1 = direct bridge, 2 = via intermediate entry
+    formality_tier: int = 2  # DS Wiki anchor's formality tier (Phase 4.3)
 
     @property
     def alignment_label(self) -> str:
@@ -152,9 +153,38 @@ def _get_bridge_col(conn: sqlite3.Connection) -> str:
     return "source_entry_id"
 
 
-def run_structural_alignment(rrp_db: str | Path) -> StructuralAlignmentResult:
+def _load_formality_tiers_sa(wiki_db: Optional[str | Path] = None) -> dict[str, int]:
+    """Load formality_tier for DS Wiki entries. Returns {entry_id: tier}."""
+    if wiki_db is None:
+        return {}
+    conn = sqlite3.connect(wiki_db)
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(entries)")}
+    if "formality_tier" not in cols:
+        conn.close()
+        return {}
+    tiers = {
+        row[0]: row[1]
+        for row in conn.execute("SELECT id, formality_tier FROM entries")
+        if row[1] is not None
+    }
+    conn.close()
+    return tiers
+
+
+def _formality_weight_sa(tier: int) -> float:
+    """Formality weight for signed score scaling (Phase 4.3)."""
+    return {1: 1.0, 2: 0.85, 3: 0.70}.get(tier, 0.85)
+
+
+def run_structural_alignment(
+    rrp_db: str | Path,
+    wiki_db: Optional[str | Path] = None,
+) -> StructuralAlignmentResult:
     """
     Compute link-type weighted bridge alignments for all entries in an RRP.
+
+    Phase 4.3: If wiki_db is provided, formality_tier weights are applied to
+    signed scores — bridges to higher-formality DS Wiki entries carry more weight.
 
     Requires:
       - entries table with (id, title, entry_type)
@@ -162,6 +192,7 @@ def run_structural_alignment(rrp_db: str | Path) -> StructuralAlignmentResult:
       - cross_universe_bridges table with bridges already populated (run Pass 2 first)
     """
     rrp_db = Path(rrp_db)
+    formality_tiers = _load_formality_tiers_sa(wiki_db)
     conn = sqlite3.connect(rrp_db)
 
     bridge_col = _get_bridge_col(conn)
@@ -209,6 +240,8 @@ def run_structural_alignment(rrp_db: str | Path) -> StructuralAlignmentResult:
         # -- One-hop: direct bridges with E's own polarity --
         direct_bridges: dict[str, BridgeAlignment] = {}
         for ds_id, ds_title, sim in bridges_by_entry.get(entry_id, []):
+            ds_tier = formality_tiers.get(ds_id, 2)
+            fw = _formality_weight_sa(ds_tier)
             ba = BridgeAlignment(
                 rrp_entry_id=entry_id,
                 rrp_entry_title=title[:50],
@@ -216,9 +249,10 @@ def run_structural_alignment(rrp_db: str | Path) -> StructuralAlignmentResult:
                 ds_entry_title=ds_title[:40],
                 raw_sim=sim,
                 polarity=own_polarity,
-                signed_score=sim * own_polarity,
+                signed_score=sim * own_polarity * fw,
                 path_description=f"direct [{own_link_desc}]",
                 hop=1,
+                formality_tier=ds_tier,
             )
             direct_bridges[ds_id] = ba
             ea.bridges.append(ba)
@@ -230,12 +264,14 @@ def run_structural_alignment(rrp_db: str | Path) -> StructuralAlignmentResult:
                 continue
             target_title = entries_meta.get(target_m, ("unknown", ""))[0][:40]
             for ds_id, ds_title, sim in bridges_by_entry.get(target_m, []):
+                ds_tier = formality_tiers.get(ds_id, 2)
+                fw = _formality_weight_sa(ds_tier)
                 if ds_id in direct_bridges:
                     # Strengthen the existing direct bridge if this path has higher |polarity|
                     existing = direct_bridges[ds_id]
                     if abs(pol) > abs(existing.polarity):
                         existing.polarity = pol
-                        existing.signed_score = existing.raw_sim * pol
+                        existing.signed_score = existing.raw_sim * pol * fw
                         existing.path_description = (
                             f"via {target_m} [{ltype}({pol:+.1f})]"
                         )
@@ -248,9 +284,10 @@ def run_structural_alignment(rrp_db: str | Path) -> StructuralAlignmentResult:
                     ds_entry_title=ds_title[:40],
                     raw_sim=sim,
                     polarity=pol,
-                    signed_score=sim * pol,
+                    signed_score=sim * pol * fw,
                     path_description=f"via {target_m} [{ltype}({pol:+.1f})]",
                     hop=2,
+                    formality_tier=ds_tier,
                 ))
 
         result.entries.append(ea)

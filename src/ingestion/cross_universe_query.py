@@ -40,7 +40,10 @@ _HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(_HERE.parent))          # src/
 sys.path.insert(0, str(_HERE.parent.parent))   # project root
 
-from config import CHROMA_DIR, CHROMA_COLLECTION, EMBED_MODEL
+from config import (
+    CHROMA_DIR, CHROMA_COLLECTION, EMBED_MODEL,
+    CROSS_ENCODER_MODEL, CROSS_ENCODER_ENABLED, RERANK_TOP_K,
+)
 
 
 # ── Constants ─────────────────────────────────────────────────────────────────
@@ -132,6 +135,7 @@ class CrossUniverseQuery:
         self.model_name = model_name
         self._model     = None
         self._coll      = None
+        self._reranker  = None   # Phase 3B: lazy-loaded cross-encoder
 
     # ── Lazy loaders ─────────────────────────────────────────────────────────
 
@@ -141,6 +145,14 @@ class CrossUniverseQuery:
             print(f"  Loading BGE model: {self.model_name} ...", flush=True)
             self._model = SentenceTransformer(self.model_name)
         return self._model
+
+    def _get_cross_encoder(self):
+        """Lazy-load cross-encoder for bridge reranking (Phase 3B)."""
+        if self._reranker is None:
+            from sentence_transformers.cross_encoder import CrossEncoder
+            print(f"  Loading cross-encoder: {CROSS_ENCODER_MODEL} ...", flush=True)
+            self._reranker = CrossEncoder(CROSS_ENCODER_MODEL)
+        return self._reranker
 
     def _get_collection(self):
         if self._coll is None:
@@ -160,40 +172,114 @@ class CrossUniverseQuery:
 
     # ── Query DS Wiki ─────────────────────────────────────────────────────────
 
-    def _query_ds_wiki(self, embedding: np.ndarray) -> list[dict]:
+    def _query_ds_wiki(
+        self,
+        embedding: np.ndarray,
+        rrp_text: Optional[str] = None,
+    ) -> list[dict]:
         """
         Query DS Wiki ChromaDB. Returns list of dicts:
-        {ds_entry_id, ds_entry_title, chunk_id, similarity}
+        {ds_entry_id, ds_entry_title, similarity}
         deduplicated to best chunk per DS Wiki entry.
+
+        Phase 3B: When CROSS_ENCODER_ENABLED and rrp_text is provided,
+        retrieves RERANK_TOP_K candidates and rescores using cross-encoder.
+        Cross-encoder scores replace BGE cosine similarity.
         """
         coll = self._get_collection()
+        use_reranker = CROSS_ENCODER_ENABLED and rrp_text is not None
+        n_results = RERANK_TOP_K if use_reranker else TOP_K_CHUNKS
+
+        # Include documents when reranking (need chunk text for cross-encoder)
+        include = ["metadatas", "distances"]
+        if use_reranker:
+            include.append("documents")
+
         results = coll.query(
             query_embeddings=[embedding.tolist()],
-            n_results=TOP_K_CHUNKS,
-            include=["metadatas", "distances"],
+            n_results=n_results,
+            include=include,
         )
 
         # distances are L2; convert to cosine similarity
         # ChromaDB with normalized embeddings: cos_sim = 1 - (distance / 2)
         candidates: dict[str, dict] = {}
+        docs = results.get("documents", [[]])[0] if use_reranker else []
 
-        for meta, dist in zip(
+        for i, (meta, dist) in enumerate(zip(
             results["metadatas"][0],
             results["distances"][0],
-        ):
+        )):
             cos_sim  = 1.0 - (dist / 2.0)
             entry_id = meta.get("entry_id", "")
             title    = meta.get("title", entry_id)
+            chunk_text = docs[i] if i < len(docs) else ""
 
-            # Keep only best chunk per DS Wiki entry
+            # Keep only best chunk per DS Wiki entry (pre-reranking dedup)
             if entry_id not in candidates or cos_sim > candidates[entry_id]["similarity"]:
                 candidates[entry_id] = {
                     "ds_entry_id":    entry_id,
                     "ds_entry_title": title,
                     "similarity":     cos_sim,
+                    "_chunk_text":    chunk_text,  # used by reranker, stripped before return
                 }
 
+        # ── Phase 3B: Cross-encoder reranking ────────────────────────────────
+        if use_reranker and len(candidates) > 1:
+            candidates = self._rerank_candidates(candidates, rrp_text)
+
+        # Strip internal fields before returning
+        for cand in candidates.values():
+            cand.pop("_chunk_text", None)
+            cand.pop("_ce_rank", None)
+            cand.pop("_ce_raw_score", None)
+
         return sorted(candidates.values(), key=lambda x: -x["similarity"])
+
+    def _rerank_candidates(
+        self,
+        candidates: dict[str, dict],
+        rrp_text: str,
+    ) -> dict[str, dict]:
+        """
+        Rerank candidates using cross-encoder (Phase 3B).
+
+        Input pairs: (rrp_text, ds_wiki_chunk_text)
+        Cross-encoder determines the ORDER, but BGE cosine similarity is
+        PRESERVED as the stored score. This is because MS MARCO cross-encoder
+        scores are calibrated for search relevance, not semantic similarity —
+        the raw logits are deeply negative for scientific text pairs even when
+        semantically relevant. BGE cosine similarity remains the right scale
+        for downstream thresholds (0.70–0.90).
+
+        Effect: the top-K candidates selected by cross-encoder ranking may
+        differ from BGE ranking, but their stored similarity is still the
+        BGE cosine value. This eliminates false positives where BGE assigns
+        high cosine similarity to semantically unrelated content.
+        """
+        reranker = self._get_cross_encoder()
+        entry_ids = list(candidates.keys())
+        if not entry_ids:
+            return candidates
+
+        pairs = [
+            (rrp_text, candidates[eid].get("_chunk_text") or candidates[eid]["ds_entry_title"])
+            for eid in entry_ids
+        ]
+
+        # Cross-encoder predict — returns raw logits (used for ranking only)
+        raw_scores = reranker.predict(pairs, show_progress_bar=False)
+
+        # Store cross-encoder rank for diagnostics, keep BGE sim for thresholds
+        ranked = sorted(zip(entry_ids, raw_scores), key=lambda x: -x[1])
+        reranked: dict[str, dict] = {}
+        for rank, (eid, ce_raw) in enumerate(ranked):
+            cand = dict(candidates[eid])
+            cand["_ce_rank"] = rank
+            cand["_ce_raw_score"] = float(ce_raw)
+            reranked[eid] = cand
+
+        return reranked
 
     # ── Fetch DS Wiki entry title (fallback if not in metadata) ───────────────
 
@@ -283,9 +369,9 @@ class CrossUniverseQuery:
                 stats["skipped_thin"] += 1
                 continue
 
-            # Embed and query
+            # Embed and query (Phase 3B: pass rrp_text for cross-encoder reranking)
             vec       = self._embed(embed_text)
-            candidates = self._query_ds_wiki(vec)
+            candidates = self._query_ds_wiki(vec, rrp_text=embed_text)
             stats["queried"] += 1
 
             # Filter and store

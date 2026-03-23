@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Principia Formal Diagnostics</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --green: #3fb950;
+            --yellow: #d29922;
+            --red: #f85149;
+            --orange: #d18616;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg); color: var(--text);
+            line-height: 1.6; min-height: 100vh;
+        }
+        .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+        /* Header */
+        header { border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 2rem; }
+        header h1 { font-size: 1.8rem; font-weight: 600; }
+        header h1 span { color: var(--accent); }
+        header p { color: var(--text-muted); margin-top: 0.3rem; font-size: 0.95rem; }
+
+        /* Cards */
+        .card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;
+        }
+        .card h2 { font-size: 1.2rem; margin-bottom: 1rem; font-weight: 600; }
+        .card h3 { font-size: 1rem; margin-bottom: 0.5rem; color: var(--accent); }
+
+        /* Upload area */
+        .upload-area {
+            border: 2px dashed var(--border); border-radius: 8px;
+            padding: 2rem; text-align: center; cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .upload-area:hover { border-color: var(--accent); }
+        .upload-area input[type="file"] { display: none; }
+        .upload-area label { cursor: pointer; display: block; }
+        .upload-area .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .upload-area p { color: var(--text-muted); }
+
+        /* Buttons */
+        .btn {
+            display: inline-block; padding: 0.6rem 1.2rem;
+            border-radius: 6px; border: 1px solid var(--border);
+            background: var(--surface); color: var(--text);
+            font-size: 0.9rem; cursor: pointer; text-decoration: none;
+            transition: all 0.15s;
+        }
+        .btn:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-primary {
+            background: var(--accent); color: var(--bg);
+            border-color: var(--accent); font-weight: 600;
+        }
+        .btn-primary:hover { background: #79c0ff; }
+        .btn-demo {
+            background: transparent; border: 1px solid var(--green);
+            color: var(--green);
+        }
+        .btn-demo:hover { background: var(--green); color: var(--bg); }
+        .btn-group { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem; }
+
+        /* Claims table */
+        .claims-list { list-style: none; }
+        .claims-list li {
+            padding: 0.8rem; border-bottom: 1px solid var(--border);
+            display: flex; align-items: flex-start; gap: 0.75rem;
+        }
+        .claims-list li:last-child { border-bottom: none; }
+        .claims-list input[type="checkbox"] {
+            margin-top: 0.3rem; accent-color: var(--accent);
+            width: 18px; height: 18px; flex-shrink: 0;
+        }
+        .claim-text { font-size: 0.9rem; flex: 1; }
+        .claim-meta {
+            font-size: 0.75rem; color: var(--text-muted);
+            margin-top: 0.3rem;
+        }
+        .claim-meta .polarity-positive { color: var(--green); }
+        .claim-meta .polarity-negative { color: var(--red); }
+        .claim-meta .polarity-neutral { color: var(--text-muted); }
+
+        /* Report */
+        .report-block {
+            background: #0d1117; border: 1px solid var(--border);
+            border-radius: 6px; padding: 1.25rem;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82rem; line-height: 1.5;
+            white-space: pre-wrap; word-wrap: break-word;
+            overflow-x: auto; max-height: 600px; overflow-y: auto;
+        }
+
+        /* Score badge */
+        .score-badge {
+            display: inline-block; padding: 0.4rem 1rem;
+            border-radius: 20px; font-size: 1.4rem; font-weight: 700;
+            margin: 0.5rem 0;
+        }
+        .score-high { background: rgba(63, 185, 80, 0.15); color: var(--green); border: 1px solid var(--green); }
+        .score-mid { background: rgba(210, 153, 34, 0.15); color: var(--yellow); border: 1px solid var(--yellow); }
+        .score-low { background: rgba(248, 81, 73, 0.15); color: var(--red); border: 1px solid var(--red); }
+
+        /* Stats row */
+        .stats-row { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; }
+        .stat-item {
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 6px; padding: 0.75rem 1rem; flex: 1; min-width: 140px;
+        }
+        .stat-item .label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .stat-item .value { font-size: 1.1rem; font-weight: 600; margin-top: 0.2rem; }
+
+        /* Error */
+        .error {
+            background: rgba(248, 81, 73, 0.1); border: 1px solid var(--red);
+            border-radius: 6px; padding: 1rem; color: var(--red);
+            margin-bottom: 1rem; font-size: 0.9rem;
+            white-space: pre-wrap; max-height: 200px; overflow-y: auto;
+        }
+
+        /* Section preview */
+        .section-preview {
+            max-height: 300px; overflow-y: auto;
+            font-size: 0.85rem; color: var(--text-muted);
+            background: var(--bg); border-radius: 4px;
+            padding: 0.75rem; margin-top: 0.5rem;
+        }
+        .section-tag {
+            display: inline-block; padding: 0.15rem 0.5rem;
+            background: rgba(88, 166, 255, 0.1); color: var(--accent);
+            border-radius: 4px; font-size: 0.75rem; margin: 0.15rem;
+        }
+
+        /* Select all */
+        .select-controls {
+            display: flex; gap: 1rem; align-items: center;
+            padding: 0.5rem 0; border-bottom: 1px solid var(--border);
+            margin-bottom: 0.5rem;
+        }
+        .select-controls label { font-size: 0.85rem; color: var(--text-muted); cursor: pointer; }
+        .select-controls input { accent-color: var(--accent); }
+
+        /* Footer */
+        footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+        footer p { font-size: 0.8rem; color: var(--text-muted); text-align: center; }
+        footer a { color: var(--accent); text-decoration: none; }
+
+        /* Spinner */
+        .spinner { display: inline-block; width: 16px; height: 16px;
+            border: 2px solid var(--border); border-top-color: var(--accent);
+            border-radius: 50%; animation: spin 0.8s linear infinite;
+            vertical-align: middle; margin-right: 0.5rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1><span>PFD</span> Principia Formal Diagnostics</h1>
+        <p>Research validation through formalized logical consistency checking</p>
+    </header>
+
+    {% if session.get('error') %}
+    <div class="error">{{ session.error }}</div>
+    {% endif %}
+
+    {% if not session.get('step') %}
+    <!-- ═══ STEP 0: Upload or Demo ═══ -->
+    <div class="card">
+        <h2>Analyze a Paper</h2>
+        <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+            <div class="upload-area" onclick="document.getElementById('pdfInput').click()">
+                <div class="icon">&#128196;</div>
+                <label for="pdfInput">
+                    <strong>Click to upload a PDF</strong>
+                    <p>Scientific paper in PDF format</p>
+                </label>
+                <input type="file" id="pdfInput" name="pdf_file" accept=".pdf"
+                       onchange="document.getElementById('uploadForm').submit(); this.closest('.upload-area').innerHTML='<div class=spinner></div> Extracting sections and claims...'">
+            </div>
+        </form>
+        <div class="btn-group">
+            <a href="/demo" class="btn btn-demo"
+               onclick="this.innerHTML='<span class=spinner></span> Running demo...'">
+                Run Demo (OPERA paper)
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>How It Works</h2>
+        <ol style="padding-left: 1.5rem; color: var(--text-muted); line-height: 2;">
+            <li><strong style="color: var(--text)">Upload</strong> a scientific paper (PDF)</li>
+            <li><strong style="color: var(--text)">Review</strong> extracted claims at the human gate</li>
+            <li><strong style="color: var(--text)">Analyze</strong> &mdash; PFD checks claims against 231 formalized scientific foundations</li>
+            <li><strong style="color: var(--text)">Report</strong> &mdash; see how the paper's logic integrates with known formal principles</li>
+        </ol>
+    </div>
+
+    {% elif session.get('step') == 'review' %}
+    <!-- ═══ STEP 1: Human Gate ═══ -->
+    <div class="card">
+        <h2>Paper: {{ session.filename }}</h2>
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="label">Sections</div>
+                <div class="value">{{ session.section_count }}</div>
+            </div>
+            <div class="stat-item">
+                <div class="label">Claims Found</div>
+                <div class="value">{{ session.claim_count }}</div>
+            </div>
+            <div class="stat-item">
+                <div class="label">Math Regions</div>
+                <div class="value">{{ session.get('math_flag_count', 0) }}</div>
+            </div>
+        </div>
+
+        {% if session.sections %}
+        <h3>Detected Sections</h3>
+        <div style="margin-bottom: 1rem;">
+            {% for name in session.sections.keys() %}
+            <span class="section-tag">{{ name }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Human Gate &mdash; Approve Claims</h2>
+        <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">
+            Review the extracted claims below. Check the ones you want to validate
+            against the DS Wiki knowledge graph. Unchecked claims will be excluded.
+        </p>
+
+        <form action="/approve" method="post" id="approveForm">
+            <div class="select-controls">
+                <label>
+                    <input type="checkbox" id="selectAll" onchange="
+                        document.querySelectorAll('.claim-check').forEach(cb => cb.checked = this.checked)
+                    "> Select all
+                </label>
+                <span style="color: var(--text-muted); font-size: 0.8rem;">
+                    {{ session.claim_count }} claims extracted
+                </span>
+            </div>
+
+            <ul class="claims-list">
+                {% for claim in session.claims %}
+                <li>
+                    <input type="checkbox" name="claim_{{ claim.idx }}" value="1" class="claim-check" checked>
+                    <div>
+                        <div class="claim-text">{{ claim.text }}</div>
+                        <div class="claim-meta">
+                            <span class="section-tag">{{ claim.section or 'unknown' }}</span>
+                            <span class="polarity-{{ claim.polarity }}">{{ claim.polarity }}</span>
+                            &middot; {{ claim.confidence }}
+                            &middot; S: {{ claim.subject[:40] }}
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary"
+                        onclick="this.innerHTML='<span class=spinner></span> Running PFD analysis...'">
+                    Approve &amp; Analyze
+                </button>
+                <a href="/" class="btn">Start Over</a>
+            </div>
+        </form>
+    </div>
+
+    {% elif session.get('step') == 'report' %}
+    <!-- ═══ STEP 3: PFD Report ═══ -->
+    <div class="card">
+        <h2>PFD Diagnostic Report</h2>
+        <p style="color: var(--text-muted); margin-bottom: 0.5rem;">{{ session.filename }}</p>
+
+        {% if session.report_data %}
+        {% set score = session.report_data.pfd_score %}
+        {% if score >= 0.8 %}
+        <div class="score-badge score-high">{{ "%.3f"|format(score) }}</div>
+        {% elif score >= 0.5 %}
+        <div class="score-badge score-mid">{{ "%.3f"|format(score) }}</div>
+        {% else %}
+        <div class="score-badge score-low">{{ "%.3f"|format(score) }}</div>
+        {% endif %}
+
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="label">Tier-1 Verdict</div>
+                <div class="value">{{ session.report_data.tier1_verdict }}</div>
+            </div>
+            <div class="stat-item">
+                <div class="label">Tier-2 Verdict</div>
+                <div class="value">{{ session.report_data.tier2_verdict }}</div>
+            </div>
+            <div class="stat-item">
+                <div class="label">Formality Weight</div>
+                <div class="value">{{ "%.3f"|format(session.report_data.formality_weight) }}</div>
+            </div>
+            <div class="stat-item">
+                <div class="label">Bridge Edges</div>
+                <div class="value">{{ session.report_data.tier2_bridge_edges }}</div>
+            </div>
+        </div>
+
+        {% if session.report_data.formality_breakdown %}
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="label">Tier-1 Anchors (physics/math)</div>
+                <div class="value" style="color: var(--green)">{{ session.report_data.formality_breakdown.get(1, 0) }}</div>
+            </div>
+            <div class="stat-item">
+                <div class="label">Tier-2 Anchors (chem/bio)</div>
+                <div class="value" style="color: var(--yellow)">{{ session.report_data.formality_breakdown.get(2, 0) }}</div>
+            </div>
+            <div class="stat-item">
+                <div class="label">Tier-3 Anchors (soft sci)</div>
+                <div class="value" style="color: var(--orange)">{{ session.report_data.formality_breakdown.get(3, 0) }}</div>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Full Report</h3>
+        <div class="report-block">{{ session.report_text }}</div>
+    </div>
+
+    <div class="btn-group">
+        <a href="/" class="btn btn-primary">Analyze Another Paper</a>
+        <a href="/demo" class="btn btn-demo">Run Demo</a>
+    </div>
+
+    {% endif %}
+
+    <footer>
+        <p>
+            <a href="https://github.com/IanD25/principia-diagnostics">Principia Formal Diagnostics</a>
+            &middot; Not a judge, a diagnostic tool &middot; All reasoning visible
+        </p>
+    </footer>
+</div>
+</body>
+</html>

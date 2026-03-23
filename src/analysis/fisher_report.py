@@ -10,7 +10,7 @@ Implements Steps 3 + 5 of the six-step PFD pipeline
 Entry points:
     generate_report(rrp_db, wiki_db, ...) → PFDReport
     PFDReport.as_text()                   → plain-text diagnostic report
-    PFDReport.as_dict()                   → machine-readable dict for MCP
+    PFDReport.as_dict()                   → machine-readable dict for programmatic access
 """
 
 from __future__ import annotations
